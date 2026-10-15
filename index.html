@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>SoleX - Buy and Sell Designer Sneakers</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <style>
 :root{--g:#00a85a;--r:#e5383b;--bg:#f4f4f2;--ink:#111;--mut:#6b6b6b;--line:#e2e2de}
 *{box-sizing:border-box;margin:0}
@@ -57,7 +57,8 @@ select{margin-left:auto;padding:9px 14px;border-radius:99px;border:1px solid var
 .stats b{display:block;color:var(--ink);font-size:17px}
 .x{position:absolute;right:14px;top:14px;border:0;background:#fff;width:34px;height:34px;border-radius:50%;font-size:18px;cursor:pointer;z-index:2}
 .imp{background:#fff;border-radius:20px;padding:28px;max-width:520px;width:100%;position:relative;margin:auto}
-.imp input{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;margin:8px 0 14px;font:inherit}
+.imp input{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;margin:6px 0;font:inherit}
+.imp textarea{width:100%;height:110px;border:1px solid var(--line);border-radius:12px;padding:12px;font:13px monospace;margin:12px 0}
 #toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,90px);background:#111;color:#fff;padding:13px 22px;border-radius:12px;font-weight:700;transition:transform .3s;z-index:20}
 #toast.show{transform:translate(-50%,0)}
 :focus-visible{outline:3px solid #2be08a;outline-offset:2px}
@@ -70,8 +71,8 @@ select{margin-left:auto;padding:9px 14px;border-radius:99px;border:1px solid var
   <div class="logo">Sole<b>X</b></div>
   <input class="search" id="q" placeholder="Search sneakers" aria-label="Search sneakers">
   <span id="coins" style="font-weight:700"></span>
-  <a class="lnk" id="inv" href="https://mohamednaser2143-sudo.github.io/solesmith/">My inventory</a>
-  <button class="cta" id="auth-btn">Sign in</button>
+  <a class="lnk" id="inv" href="#">My inventory</a>
+  <button class="cta" id="auth">Sign in</button>
 </nav>
 <div class="tick"><div id="tick"></div></div>
 <section class="hero">
@@ -82,26 +83,15 @@ select{margin-left:auto;padding:9px 14px;border-radius:99px;border:1px solid var
 <div class="grid" id="grid"></div>
 
 <div class="ov" id="ov"><div class="modal" id="modal"></div></div>
-<div class="ov" id="auth-ov">
-  <div class="imp">
-    <button class="x" id="auth-x">&times;</button>
-    <h2 id="auth-title" style="margin-bottom:6px">Sign In</h2>
-    <p style="color:var(--mut);font-size:14px;margin-bottom:14px">Enter your email and password to play and save coins.</p>
-    <label style="font-size:13px;font-weight:700">Email</label>
-    <input type="email" id="email-in" placeholder="player@example.com">
-    <label style="font-size:13px;font-weight:700">Password</label>
-    <input type="password" id="pass-in" placeholder="••••••••">
-    <button class="b g" id="auth-sub" style="width:100%;margin-top:4px">Continue</button>
-    <p style="text-align:center;margin-top:14px;font-size:13px;color:var(--mut);cursor:pointer" id="auth-switch">Need an account? Register</p>
-  </div>
-</div>
+<div class="ov" id="am"><div class="imp">
+  <h2>Welcome to SoleX</h2><p style="color:var(--mut);margin:6px 0 10px">Create an account and start with 1,000 coins.</p>
+  <input id="em" type="email" placeholder="Email" autocomplete="email">
+  <input id="pw" type="password" placeholder="Password (6+ characters)" autocomplete="current-password">
+  <div class="btns" style="margin-top:10px"><button class="b" id="si">Sign in</button><button class="b g" id="su">Create account</button></div>
+</div></div>
 <div id="toast"></div>
 <script>
 const $=s=>document.querySelector(s);
-const SUPABASE_URL="https://xqftxszpozrpuzhsnyho.supabase.co";
-const SUPABASE_ANON_KEY="sb_publishable_IBatpScfMC8L4Ys93DQWMg_GJKLyD3B";
-
-const supabase=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 const PARTS=7;
 const RC={Common:'#8a8497',Rare:'#2e86ff',Epic:'#a855f7',Legendary:'#e08a00'};
 const PRE=[
@@ -119,6 +109,7 @@ const PRE=[
 ['Deep Sea',['#12305a','#2e86ff','#2e86ff','#00c2a8','#ffffff','#ffffff','#0b0b0f'],'glitter']
 ].map(p=>({n:p[0],c:p[1],f:p[2]}));
 
+const PR=[420,650,380,510,890,300,340,450,720,560,980,610];PRE.forEach((d,i)=>d.price=PR[i]);
 function shoeSVG(c,f){
  const UP='M40 148 L38 66 Q40 50 62 50 L100 52 Q118 92 150 96 L165 60 L200 58 L215 92 Q330 98 372 132 Q390 146 388 150 Z';
  let laces='';for(let i=0;i<4;i++){const x=172+i*15,y=68+i*8;laces+=`<line x1="${x-12}" y1="${y+6}" x2="${x+14}" y2="${y-2}" stroke="${c[4]}" stroke-width="4" stroke-linecap="round"/>`}
@@ -148,12 +139,12 @@ const SIZES=['6','7','7.5','8','8.5','9','9.5','10','10.5','11','12','13'];
 
 function build(d,tag){
  const r=rng(hash(d.n+d.c.join())),sc=score(d),retail=Math.round((140+r()*80)/5)*5;
- const price=Math.round(retail*(0.9+sc/55+r()*.3));
+ const price=d.price;
  let p=price*.78;const hist=[];for(let i=0;i<12;i++){p*=.96+r()*.1;hist.push(p)}
  const k=price/hist[11];const H=hist.map(v=>Math.round(v*k));
  return{...d,id:hash(d.n+d.c.join()),sc,rar:rarity(sc),retail,price,hist:H,tag,
   sold:Math.floor(20+r()*900*sc/60),chg:+((H[11]/H[10]-1)*100).toFixed(1),
-  asks:SIZES.map(()=>Math.round(price*(.94+r()*.22)))};
+  asks:SIZES.map((_,k)=>Math.round(price*(95+2*k)/100))};
 }
 let ITEMS=PRE.map(d=>build(d)),filt='All',bag=[],cur=null,curSz=null;
 
@@ -202,78 +193,35 @@ $('#filters').onclick=e=>{if(e.target.dataset.f){filt=e.target.dataset.f;bars();
 $('#q').oninput=draw;
 $('#tick').innerHTML=ITEMS.slice(0,10).map(i=>`<span>${i.n} <b>${$$(i.hist[11])}</b> size ${SIZES[Math.floor(i.asks[0]%SIZES.length)]}</span>`).join('');
 bars();draw();
-
-let me=null,coins=0,isReg=false;
-$('#inv').href="https://mohamednaser2143-sudo.github.io/solesmith/";
-
-async function checkAuth(){
- const {data:{user}}=await supabase.auth.getUser();
- me=user;
- if(me){
-  const {data}=await supabase.from('users').select('coins').eq('id',me.id).single();
-  if(data){coins=data.coins;}else{
-   await supabase.from('users').insert({id:me.id,name:me.email.split('@')[0],coins:1000});
-   coins=1000;
-  }
- }else{coins=0;}
- paint();
+const SB=supabase.createClient("https://xqftxszpozrpuzhsnyho.supabase.co","sb_publishable_IBatpScfMC8L4Ys93DQWMg_GJKLyD3B");
+const GAME="https://mohamednaser2143-sudo.github.io/solesmith/";
+let me=null,coins=0;
+$("#inv").href=GAME;
+function paint(){$("#auth").textContent=me?"Sign out":"Sign in";$("#coins").textContent=me?coins.toLocaleString()+" coins":""}
+async function load(){
+ if(!me){coins=0;return paint()}
+ const {data}=await SB.from("profiles").select("coins").eq("id",me.id).single();
+ coins=data?data.coins:0;paint();
 }
-
-function paint(){
- $('#auth-btn').textContent=me?"Sign out":"Sign in";
- $('#coins').textContent=me?coins.toLocaleString()+" coins":"";
+async function login(up){
+ const email=$("#em").value.trim(),password=$("#pw").value;
+ const r=up?await SB.auth.signUp({email,password}):await SB.auth.signInWithPassword({email,password});
+ if(r.error)return toast(r.error.message);
+ if(!r.data.session)return toast("Check your email to confirm, then sign in");
+ $("#am").classList.remove("on");toast(up?"Welcome! You start with 1,000 coins":"Signed in");
 }
-
-$('#auth-btn').onclick=async()=>{
- if(me){await supabase.auth.signOut();me=null;coins=0;paint();toast("Signed out");return;}
- $('#auth-ov').classList.add('on');
-};
-$('#auth-x').onclick=()=>$('#auth-ov').classList.remove('on');
-$('#auth-switch').onclick=()=>{
- isReg=!isReg;
- $('#auth-title').textContent=isReg?"Create Account":"Sign In";
- $('#auth-sub').textContent=isReg?"Register":"Sign In";
- $('#auth-switch').textContent=isReg?"Already have an account? Sign in":"Need an account? Register";
-};
-$('#auth-sub').onclick=async()=>{
- const em=$('#email-in').value,pw=$('#pass-in').value;
- if(!em||!pw)return toast("Enter email and password");
- if(isReg){
-  const {error}=await supabase.auth.signUp({email:em,password:pw});
-  if(error)return toast(error.message);
-  toast("Account created! You can now sign in.");
-  isReg=false;$('#auth-title').textContent="Sign In";$('#auth-sub').textContent="Sign In";
- }else{
-  const {error}=await supabase.auth.signInWithPassword({email:em,password:pw});
-  if(error)return toast(error.message);
-  $('#auth-ov').classList.remove('on');
-  toast("Signed in successfully");
-  checkAuth();
- }
-};
-
+$("#si").onclick=()=>login(false);$("#su").onclick=()=>login(true);
+$("#am").onclick=e=>{if(e.target.id==="am")$("#am").classList.remove("on")};
+$("#auth").onclick=()=>me?SB.auth.signOut():$("#am").classList.add("on");
+SB.auth.onAuthStateChange((_e,sess)=>{me=sess?sess.user:null;load()});
 async function purchase(){
- if(!me)return $('#auth-ov').classList.add('on');
+ if(!me)return $("#am").classList.add("on");
  if(curSz===null)return toast("Pick a size first");
- const price=cur.asks[curSz];
- if(coins<price)return toast("Not enough coins");
-
- const newCoins=coins-price;
- const {error}=await supabase.from('users').update({coins:newCoins}).eq('id',me.id);
- if(error)return toast("Purchase failed");
- 
- coins=newCoins;
- paint();
-
- await supabase.from('inventory').insert({
-  user_id:me.id,n:cur.n,c:cur.c,f:cur.f,z:SIZES[curSz],r:cur.rar,paid:price,ts:Date.now()
- });
-
- $('#ov').classList.remove('on');
- toast("Bought "+cur.n+" in size "+SIZES[curSz]+". Find it in your inventory.");
+ const {error}=await SB.rpc("buy_shop",{p_name:cur.n,p_size:SIZES[curSz]});
+ if(error)return toast(error.message);
+ $("#ov").classList.remove("on");load();
+ toast("Bought "+cur.n+" (size "+SIZES[curSz]+"). It is in your SoleSmith inventory.");
 }
-checkAuth();
-bars();draw();
 </script>
 </body>
 </html>
