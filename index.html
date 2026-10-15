@@ -248,14 +248,13 @@ function drawDrop(){
  const el=$("#drop");if(!DROP){el.className="";el.innerHTML="";return}
  const d=DROP,s=d.shoe,left=d.stock-d.sold,key=d.slot+"-"+d.sold;
  if(el.dataset.k===key)return;el.dataset.k=key;
- const keep=$("#dsz")?$("#dsz").value:"10";
  el.className="dropc";
- el.innerHTML=`<div class="dl">${shoeSVG(s.c,s.f)}</div><div><span class="live">LIVE DROP</span><h2>${s.n}</h2><p>Worth about ${$$(d.value)} &middot; Drop price ${$$(d.price)} &middot; ${left} of ${d.stock} left</p><div class="dact"><select id="dsz">${SIZES.map(z=>`<option${z===keep?" selected":""}>${z}</option>`).join("")}</select><button class="b g" id="dbuy" ${left<1?"disabled":""}>${left<1?"Sold out":"Buy drop"}</button><b id="dcd"></b></div></div>`;
+ el.innerHTML=`<div class="dl">${shoeSVG(s.c,s.f)}</div><div><span class="live">${d.stock<=2?"RARE DROP":"LIVE DROP"}</span><h2>${s.n}</h2><p>Worth about ${$$(d.value)} &middot; Drop price ${$$(d.price)} &middot; Size ${d.size} (automatic) &middot; ${left} of ${d.stock} left</p><div class="dact"><button class="b g" id="dbuy" ${left<1?"disabled":""}>${left<1?"Sold out":"Buy drop"}</button><b id="dcd"></b></div></div>`;
 }
 $("#drop").onclick=async e=>{
  if(e.target.id!=="dbuy")return;
  if(!me)return $("#am").classList.add("on");
- const {data,error}=await SB.rpc("buy_drop",{p_slot:DROP.slot,p_size:$("#dsz").value});
+ const {data,error}=await SB.rpc("buy_drop",{p_slot:DROP.slot});
  if(error)return toast(error.message);
  toast("You got "+DROP.shoe.n+" for "+$$(data)+". Sell it to offers in SoleSmith!");load();refresh();
 };
