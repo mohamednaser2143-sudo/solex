@@ -5,9 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>SoleX - Buy and Sell Designer Sneakers</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--g:#00a85a;--r:#e5383b;--bg:#f4f4f2;--ink:#111;--mut:#6b6b6b;--line:#e2e2de}
 *{box-sizing:border-box;margin:0}
@@ -59,7 +57,7 @@ select{margin-left:auto;padding:9px 14px;border-radius:99px;border:1px solid var
 .stats b{display:block;color:var(--ink);font-size:17px}
 .x{position:absolute;right:14px;top:14px;border:0;background:#fff;width:34px;height:34px;border-radius:50%;font-size:18px;cursor:pointer;z-index:2}
 .imp{background:#fff;border-radius:20px;padding:28px;max-width:520px;width:100%;position:relative;margin:auto}
-.imp textarea{width:100%;height:110px;border:1px solid var(--line);border-radius:12px;padding:12px;font:13px monospace;margin:12px 0}
+.imp input{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;margin:8px 0 14px;font:inherit}
 #toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,90px);background:#111;color:#fff;padding:13px 22px;border-radius:12px;font-weight:700;transition:transform .3s;z-index:20}
 #toast.show{transform:translate(-50%,0)}
 :focus-visible{outline:3px solid #2be08a;outline-offset:2px}
@@ -73,7 +71,7 @@ select{margin-left:auto;padding:9px 14px;border-radius:99px;border:1px solid var
   <input class="search" id="q" placeholder="Search sneakers" aria-label="Search sneakers">
   <span id="coins" style="font-weight:700"></span>
   <a class="lnk" id="inv" href="#">My inventory</a>
-  <button class="cta" id="auth">Sign in with Google</button>
+  <button class="cta" id="auth-btn">Sign in</button>
 </nav>
 <div class="tick"><div id="tick"></div></div>
 <section class="hero">
@@ -84,10 +82,27 @@ select{margin-left:auto;padding:9px 14px;border-radius:99px;border:1px solid var
 <div class="grid" id="grid"></div>
 
 <div class="ov" id="ov"><div class="modal" id="modal"></div></div>
+<div class="ov" id="auth-ov">
+  <div class="imp">
+    <button class="x" id="auth-x">&times;</button>
+    <h2 id="auth-title" style="margin-bottom:6px">Sign In</h2>
+    <p style="color:var(--mut);font-size:14px;margin-bottom:14px">Enter your email and password to play and save coins.</p>
+    <label style="font-size:13px;font-weight:700">Email</label>
+    <input type="email" id="email-in" placeholder="player@example.com">
+    <label style="font-size:13px;font-weight:700">Password</label>
+    <input type="password" id="pass-in" placeholder="••••••••">
+    <button class="b g" id="auth-sub" style="width:100%;margin-top:4px">Continue</button>
+    <p style="text-align:center;margin-top:14px;font-size:13px;color:var(--mut);cursor:pointer" id="auth-switch">Need an account? Register</p>
+  </div>
+</div>
 <div id="toast"></div>
 <script>
 const $=s=>document.querySelector(s);
-const PARTS=7;
+const SUPABASE_URL="https://xqftxszpozrpuzhsnyho.supabase.co";
+const SUPABASE_ANON_KEY="sb_publishable_IBatpScfMC8L4Ys93DQWMg_GJKLyD3B";
+const OTHER_URL="https://mohamednaser2143-sudo.github.io/solesmith/";
+
+const supabase=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 const RC={Common:'#8a8497',Rare:'#2e86ff',Epic:'#a855f7',Legendary:'#e08a00'};
 const PRE=[
 ['Midnight Runner',['#14141c','#2e86ff','#2e86ff','#ffffff','#ffffff','#ffffff','#2e86ff'],'matte'],
@@ -140,7 +155,7 @@ function build(d,tag){
   sold:Math.floor(20+r()*900*sc/60),chg:+((H[11]/H[10]-1)*100).toFixed(1),
   asks:SIZES.map(()=>Math.round(price*(.94+r()*.22)))};
 }
-let ITEMS=PRE.map(d=>build(d)),filt='All',bag=[],cur=null,curSz=null;
+let ITEMS=PRE.map(d=>build(d)),filt='All',cur=null,curSz=null;
 
 function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2400)}
 function draw(){
@@ -162,7 +177,7 @@ function chart(h){
  const line=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
  return `<svg viewBox="0 0 ${w} ${ht+4}" style="width:100%;background:#fff;border-radius:12px"><path d="${line} L${w} ${ht} L0 ${ht} Z" fill="rgba(0,168,90,.12)"/><path d="${line}" fill="none" stroke="#00a85a" stroke-width="3" stroke-linejoin="round"/></svg>`;
 }
-function open(id){
+function openModal(id){
  cur=ITEMS.find(i=>i.id==id);curSz=null;
  const i=cur,lo=Math.min(...i.asks);
  $('#modal').innerHTML=`<button class="x" id="cl" aria-label="Close">&times;</button>
@@ -174,8 +189,8 @@ function open(id){
  <p style="color:var(--mut);font-size:13px;margin-top:14px">Retail ${$$(i.retail)} &middot; ${i.sold.toLocaleString()} sold &middot; Hype ${i.sc}/99</p></div>`;
  $('#ov').classList.add('on');
 }
-$('#grid').onclick=e=>{const c=e.target.closest('.card');if(c)open(c.dataset.id)};
-$('#grid').onkeydown=e=>{if(e.key==='Enter'){const c=e.target.closest('.card');if(c)open(c.dataset.id)}};
+$('#grid').onclick=e=>{const c=e.target.closest('.card');if(c)openModal(c.dataset.id)};
+$('#grid').onkeydown=e=>{if(e.key==='Enter'){const c=e.target.closest('.card');if(c)openModal(c.dataset.id)}};
 $('#modal').onclick=e=>{
  if(e.target.id==='cl')return $('#ov').classList.remove('on');
  const s=e.target.closest('.sz');
@@ -187,27 +202,77 @@ $('#filters').onclick=e=>{if(e.target.dataset.f){filt=e.target.dataset.f;bars();
 $('#q').oninput=draw;
 $('#tick').innerHTML=ITEMS.slice(0,10).map(i=>`<span>${i.n} <b>${$$(i.hist[11])}</b> size ${SIZES[Math.floor(i.asks[0]%SIZES.length)]}</span>`).join('');
 bars();draw();
-const FB={apiKey:"PASTE_HERE",authDomain:"PASTE_HERE",databaseURL:"PASTE_HERE",projectId:"PASTE_HERE",appId:"PASTE_HERE"};
-const OTHER_URL="https://YOUR-NAME.github.io/REPO-NAME/";
-let auth,db;try{firebase.initializeApp(FB);auth=firebase.auth();db=firebase.database()}catch(e){console.warn("Add your Firebase config",e);auth={onAuthStateChanged(){},signOut(){},signInWithPopup(){return Promise.reject({code:"add-your-firebase-config"})}}}
-const esc=t=>String(t).replace(/[<>&"]/g,"");
-let me=null,coins=0;
-$("#auth").onclick=()=>me?auth.signOut():auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>toast("Sign in failed: "+e.code));
-$("#inv").href=OTHER_URL;
-function paint(){$("#auth").textContent=me?"Sign out":"Sign in with Google";$("#coins").textContent=me?coins.toLocaleString()+" coins":""}
-auth.onAuthStateChanged(async u=>{me=u;if(!u){coins=0;paint();return}
- const r=db.ref("users/"+u.uid),s=await r.get();if(!s.exists())await r.set({name:u.displayName||"Player",coins:1000});
- r.child("coins").on("value",v=>{coins=v.val()||0;paint()})});
+
+let me=null,coins=0,isReg=false;
+$('#inv').href=OTHER_URL;
+
+async function checkAuth(){
+ const {data:{user}}=await supabase.auth.getUser();
+ me=user;
+ if(me){
+  const {data}=await supabase.from('users').select('coins').eq('id',me.id).single();
+  if(data){coins=data.coins;}else{
+   await supabase.from('users').insert({id:me.id,name:me.email.split('@')[0],coins:1000});
+   coins=1000;
+  }
+ }else{coins=0;}
+ paint();
+}
+
+function paint(){
+ $('#auth-btn').textContent=me?"Sign out":"Sign in";
+ $('#coins').textContent=me?coins.toLocaleString()+" coins":"";
+}
+
+$('#auth-btn').onclick=async()=>{
+ if(me){await supabase.auth.signOut();me=null;coins=0;paint();toast("Signed out");return;}
+ $('#auth-ov').classList.add('on');
+};
+$('#auth-x').onclick=()=>$('#auth-ov').classList.remove('on');
+$('#auth-switch').onclick=()=>{
+ isReg=!isReg;
+ $('#auth-title').textContent=isReg?"Create Account":"Sign In";
+ $('#auth-sub').textContent=isReg?"Register":"Sign In";
+ $('#auth-switch').textContent=isReg?"Already have an account? Sign in":"Need an account? Register";
+};
+$('#auth-sub').onclick=async()=>{
+ const em=$('#email-in').value,pw=$('#pass-in').value;
+ if(!em||!pw)return toast("Enter email and password");
+ if(isReg){
+  const {error}=await supabase.auth.signUp({email:em,password:pw});
+  if(error)return toast(error.message);
+  toast("Account created! You can now sign in.");
+  isReg=false;$('#auth-title').textContent="Sign In";$('#auth-sub').textContent="Sign In";
+ }else{
+  const {error}=await supabase.auth.signInWithPassword({email:em,password:pw});
+  if(error)return toast(error.message);
+  $('#auth-ov').classList.remove('on');
+  toast("Signed in successfully");
+  checkAuth();
+ }
+};
+
 async function purchase(){
- if(!me)return toast("Sign in with Google to buy");
+ if(!me)return $('#auth-ov').classList.add('on');
  if(curSz===null)return toast("Pick a size first");
  const price=cur.asks[curSz];
- const r=await db.ref("users/"+me.uid+"/coins").transaction(v=>(v||0)>=price?v-price:undefined);
- if(!r.committed)return toast("Not enough coins");
- await db.ref("inv/"+me.uid).push({n:cur.n,c:cur.c,f:cur.f,z:SIZES[curSz],r:cur.rar,paid:price,ts:Date.now()});
- $("#ov").classList.remove("on");toast("Bought "+cur.n+" in size "+SIZES[curSz]+". Find it in your inventory.");
+ if(coins<price)return toast("Not enough coins");
+
+ const newCoins=coins-price;
+ const {error}=await supabase.from('users').update({coins:newCoins}).eq('id',me.id);
+ if(error)return toast("Purchase failed");
+ 
+ coins=newCoins;
+ paint();
+
+ await supabase.from('inventory').insert({
+  user_id:me.id,n:cur.n,c:cur.c,f:cur.f,z:SIZES[curSz],r:cur.rar,paid:price,ts:Date.now()
+ });
+
+ $('#ov').classList.remove('on');
+ toast("Bought "+cur.n+" in size "+SIZES[curSz]+". Find it in your inventory.");
 }
-bars();draw();
+checkAuth();
 </script>
 </body>
 </html>
