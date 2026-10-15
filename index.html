@@ -70,7 +70,7 @@ select{margin-left:auto;padding:9px 14px;border-radius:99px;border:1px solid var
   <div class="logo">Sole<b>X</b></div>
   <input class="search" id="q" placeholder="Search sneakers" aria-label="Search sneakers">
   <span id="coins" style="font-weight:700"></span>
-  <a class="lnk" id="inv" href="https://mohamednaser2143-sudo.github.io/solesmith/">My inventory & Market</a>
+  <a class="lnk" id="inv" href="https://mohamednaser2143-sudo.github.io/solesmith/">My inventory</a>
   <button class="cta" id="auth-btn">Sign in</button>
 </nav>
 <div class="tick"><div id="tick"></div></div>
@@ -102,6 +102,7 @@ const SUPABASE_URL="https://xqftxszpozrpuzhsnyho.supabase.co";
 const SUPABASE_ANON_KEY="sb_publishable_IBatpScfMC8L4Ys93DQWMg_GJKLyD3B";
 
 const supabase=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+const PARTS=7;
 const RC={Common:'#8a8497',Rare:'#2e86ff',Epic:'#a855f7',Legendary:'#e08a00'};
 const PRE=[
 ['Midnight Runner',['#14141c','#2e86ff','#2e86ff','#ffffff','#ffffff','#ffffff','#2e86ff'],'matte'],
