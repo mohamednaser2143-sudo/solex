@@ -62,6 +62,14 @@ select{margin-left:auto;padding:9px 14px;border-radius:99px;border:1px solid var
 #toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,90px);background:#111;color:#fff;padding:13px 22px;border-radius:12px;font-weight:700;transition:transform .3s;z-index:20}
 #toast.show{transform:translate(-50%,0)}
 :focus-visible{outline:3px solid #2be08a;outline-offset:2px}
+.dropc{max-width:1224px;margin:6px 28px 16px;background:#111;color:#fff;border-radius:20px;display:grid;grid-template-columns:320px 1fr;gap:18px;align-items:center;padding:20px}
+@media(min-width:1280px){.dropc{margin:6px auto 16px}}
+.dropc .dl{background:#f1f1ee;border-radius:14px;padding:14px}
+.dropc h2{font-size:30px;letter-spacing:-1px;margin:8px 0 4px}.dropc p{color:#bbb}
+.live{background:#e5383b;color:#fff;font-weight:800;font-size:12px;padding:4px 12px;border-radius:99px}
+.dact{display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap}.dact select{margin:0}
+.dact .b{padding:12px 22px}.dact .b:disabled{opacity:.4}
+@media(max-width:760px){.dropc{grid-template-columns:1fr;margin:6px 16px 16px}}
 @media(max-width:760px){.modal{grid-template-columns:1fr}.modal .l{border-radius:22px 22px 0 0}nav,.hero,.bar,.grid{padding-left:16px;padding-right:16px}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -69,7 +77,7 @@ select{margin-left:auto;padding:9px 14px;border-radius:99px;border:1px solid var
 <body>
 <nav>
   <div class="logo">Sole<b>X</b></div>
-  <input class="search" id="q" placeholder="Search sneakers" aria-label="Search sneakers">
+  <input class="search" id="q" type="search" name="shoe-search" autocomplete="off" placeholder="Search sneakers" aria-label="Search sneakers">
   <span id="coins" style="font-weight:700"></span>
   <a class="lnk" id="inv" href="#">My inventory</a>
   <button class="cta" id="auth">Sign in</button>
@@ -79,13 +87,14 @@ select{margin-left:auto;padding:9px 14px;border-radius:99px;border:1px solid var
   <h1>The market for sneakers you designed.</h1>
   <p>Buy with coins. Every pair goes straight into your SoleSmith inventory, where you can trade it with other players.</p>
 </section>
+<div id="drop"></div>
 <div class="bar" id="filters"></div>
 <div class="grid" id="grid"></div>
 
 <div class="ov" id="ov"><div class="modal" id="modal"></div></div>
 <div class="ov" id="am"><div class="imp">
   <h2>Welcome to SoleX</h2><p style="color:var(--mut);margin:6px 0 10px">Create an account and start with 1,000 coins.</p>
-  <input id="em" type="email" placeholder="Email" autocomplete="email">
+  <input id="em" name="email" type="email" placeholder="Email" autocomplete="email">
   <input id="pw" type="password" placeholder="Password (6+ characters)" autocomplete="current-password">
   <div class="btns" style="margin-top:10px"><button class="b" id="si">Sign in</button><button class="b g" id="su">Create account</button></div>
 </div></div>
@@ -193,6 +202,7 @@ $('#filters').onclick=e=>{if(e.target.dataset.f){filt=e.target.dataset.f;bars();
 $('#q').oninput=draw;
 $('#tick').innerHTML=ITEMS.slice(0,10).map(i=>`<span>${i.n} <b>${$$(i.hist[11])}</b> size ${SIZES[Math.floor(i.asks[0]%SIZES.length)]}</span>`).join('');
 bars();draw();
+setTimeout(()=>{const q=$("#q");if(q.value){q.value="";draw()}},500);
 const SB=supabase.createClient("https://xqftxszpozrpuzhsnyho.supabase.co","sb_publishable_IBatpScfMC8L4Ys93DQWMg_GJKLyD3B");
 const GAME="https://mohamednaser2143-sudo.github.io/solesmith/";
 let me=null,coins=0;
@@ -200,6 +210,7 @@ $("#inv").href=GAME;
 function paint(){$("#auth").textContent=me?"Sign out":"Sign in";$("#coins").textContent=me?coins.toLocaleString()+" coins":""}
 async function load(){
  if(!me){coins=0;return paint()}
+ await SB.rpc("collect");
  const {data}=await SB.from("profiles").select("coins").eq("id",me.id).single();
  coins=data?data.coins:0;paint();
 }
@@ -217,11 +228,43 @@ SB.auth.onAuthStateChange((_e,sess)=>{me=sess?sess.user:null;load()});
 async function purchase(){
  if(!me)return $("#am").classList.add("on");
  if(curSz===null)return toast("Pick a size first");
- const {error}=await SB.rpc("buy_shop",{p_name:cur.n,p_size:SIZES[curSz]});
+ const {data:paid,error}=await SB.rpc("buy_shop",{p_name:cur.n,p_size:SIZES[curSz]});
  if(error)return toast(error.message);
  $("#ov").classList.remove("on");load();
- toast("Bought "+cur.n+" (size "+SIZES[curSz]+"). It is in your SoleSmith inventory.");
+ toast("Bought "+cur.n+" (size "+SIZES[curSz]+") for "+$$(paid)+" coins. It is in your SoleSmith inventory.");
 }
+let DROP=null;
+async function refresh(){
+ await SB.rpc("tick_prices");
+ const {data}=await SB.from("shop").select("name,price,hist");
+ (data||[]).forEach(r=>{const it=ITEMS.find(x=>x.n===r.name);if(!it)return;
+  it.price=r.price;it.asks=SIZES.map((_,k)=>Math.round(r.price*(95+2*k)/100));
+  const h=r.hist&&r.hist.length?r.hist:[r.price],g=it.gen||(it.gen=it.hist.slice()),b=h[0],gg=g.map(v=>Math.round(v*b/g[11]));
+  it.hist=gg.slice(h.length).concat(h);it.chg=+((it.hist[11]/it.hist[10]-1)*100).toFixed(1)});
+ draw();
+ const d=await SB.rpc("current_drop");DROP=d.data&&d.data[0]?d.data[0]:null;drawDrop();
+}
+function drawDrop(){
+ const el=$("#drop");if(!DROP){el.className="";el.innerHTML="";return}
+ const d=DROP,s=d.shoe,left=d.stock-d.sold,key=d.slot+"-"+d.sold;
+ if(el.dataset.k===key)return;el.dataset.k=key;
+ const keep=$("#dsz")?$("#dsz").value:"10";
+ el.className="dropc";
+ el.innerHTML=`<div class="dl">${shoeSVG(s.c,s.f)}</div><div><span class="live">LIVE DROP</span><h2>${s.n}</h2><p>Worth about ${$$(d.value)} &middot; Drop price ${$$(d.price)} &middot; ${left} of ${d.stock} left</p><div class="dact"><select id="dsz">${SIZES.map(z=>`<option${z===keep?" selected":""}>${z}</option>`).join("")}</select><button class="b g" id="dbuy" ${left<1?"disabled":""}>${left<1?"Sold out":"Buy drop"}</button><b id="dcd"></b></div></div>`;
+}
+$("#drop").onclick=async e=>{
+ if(e.target.id!=="dbuy")return;
+ if(!me)return $("#am").classList.add("on");
+ const {data,error}=await SB.rpc("buy_drop",{p_slot:DROP.slot,p_size:$("#dsz").value});
+ if(error)return toast(error.message);
+ toast("You got "+DROP.shoe.n+" for "+$$(data)+". Sell it to offers in SoleSmith!");load();refresh();
+};
+let lastTry=0;
+setInterval(()=>{const el=$("#dcd");if(!el||!DROP)return;const ms=new Date(DROP.ends_at)-Date.now();
+ if(ms<=0){if(Date.now()-lastTry>3000){lastTry=Date.now();refresh()}return}
+ const t=Math.ceil(ms/1000);el.textContent="Next drop in "+Math.floor(t/60)+":"+String(t%60).padStart(2,"0")},1000);
+setInterval(()=>{refresh();load()},15000);
+refresh();
 </script>
 </body>
 </html>
