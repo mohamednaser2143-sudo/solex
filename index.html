@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SoleX - Buy and Sell Designer Sneakers</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<style>
+:root{--g:#00a85a;--r:#e5383b;--bg:#f4f4f2;--ink:#111;--mut:#6b6b6b;--line:#e2e2de}
+*{box-sizing:border-box;margin:0}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink)}
+nav{background:#111;color:#fff;display:flex;align-items:center;gap:18px;padding:12px 28px;position:sticky;top:0;z-index:5;flex-wrap:wrap}
+.logo{font-weight:800;font-size:26px;letter-spacing:-1px}.logo b{color:#2be08a}
+.search{flex:1;min-width:200px;background:#2a2a2a;border:0;border-radius:99px;padding:11px 18px;color:#fff;font:500 15px inherit}
+.search::placeholder{color:#999}
+nav button{background:none;border:0;color:#fff;font:700 14px inherit;cursor:pointer;padding:8px 10px;border-radius:8px}
+.lnk{color:#fff;font-weight:700;font-size:14px;text-decoration:none;padding:8px 10px}
+nav .cta{background:var(--g)}
+.tick{background:#fff;border-bottom:1px solid var(--line);overflow:hidden;white-space:nowrap;font-size:13px;padding:9px 0}
+.tick div{display:inline-block;animation:mv 40s linear infinite;padding-left:100%}
+.tick span{margin-right:36px}.tick b{color:var(--g)}
+@keyframes mv{to{transform:translateX(-100%)}}
+.hero{padding:44px 28px 20px;max-width:1280px;margin:auto}
+.hero h1{font-size:clamp(34px,5.5vw,64px);font-weight:800;letter-spacing:-2px;line-height:1}
+.hero p{color:var(--mut);margin-top:12px;font-size:17px;max-width:560px}
+.bar{max-width:1280px;margin:auto;padding:14px 28px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.f{background:#fff;border:1px solid var(--line);padding:9px 18px;border-radius:99px;font:700 14px inherit;cursor:pointer}
+.f.on{background:#111;color:#fff;border-color:#111}
+select{margin-left:auto;padding:9px 14px;border-radius:99px;border:1px solid var(--line);background:#fff;font:700 14px inherit}
+.grid{max-width:1280px;margin:auto;padding:6px 28px 60px;display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
+.card{background:#fff;border-radius:16px;overflow:hidden;cursor:pointer;border:1px solid var(--line);transition:transform .15s,box-shadow .15s}
+.card:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(0,0,0,.08)}
+.pic{background:#f1f1ee;padding:26px 14px 14px;position:relative}
+.tag{position:absolute;left:12px;top:12px;font-size:12px;font-weight:700;color:#fff;padding:4px 10px;border-radius:99px}
+.info{padding:14px 16px 18px}
+.info h4{font-size:15px;font-weight:700;min-height:20px}
+.info small{color:var(--mut)}
+.price{font-size:22px;font-weight:800;margin-top:12px}
+.up{color:var(--g);font-weight:700;font-size:13px}.dn{color:var(--r);font-weight:700;font-size:13px}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:flex-start;justify-content:center;overflow:auto;padding:30px 14px;z-index:10}
+.ov.on{display:flex}
+.modal{background:#fff;border-radius:22px;max-width:1000px;width:100%;display:grid;grid-template-columns:1fr 1fr;position:relative;animation:pop .22s}
+@keyframes pop{from{transform:scale(.96);opacity:0}}
+.modal .l{background:#f1f1ee;border-radius:22px 0 0 22px;padding:30px 18px;display:flex;flex-direction:column;justify-content:center;gap:20px}
+.modal .rt{padding:30px}
+.rt h2{font-size:28px;letter-spacing:-.5px}
+.sizes{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0 16px}
+.sz{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 4px;cursor:pointer;font:700 14px inherit}
+.sz small{display:block;color:var(--g);font-size:12px;margin-top:2px}
+.sz.on{border:2px solid #111}
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.b{padding:15px;border-radius:12px;border:2px solid #111;background:#fff;font:800 15px inherit;cursor:pointer}
+.b.g{background:var(--g);border-color:var(--g);color:#fff}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}
+.stats div{background:var(--bg);border-radius:12px;padding:10px 12px;font-size:13px;color:var(--mut)}
+.stats b{display:block;color:var(--ink);font-size:17px}
+.x{position:absolute;right:14px;top:14px;border:0;background:#fff;width:34px;height:34px;border-radius:50%;font-size:18px;cursor:pointer;z-index:2}
+.imp{background:#fff;border-radius:20px;padding:28px;max-width:520px;width:100%;position:relative;margin:auto}
+.imp textarea{width:100%;height:110px;border:1px solid var(--line);border-radius:12px;padding:12px;font:13px monospace;margin:12px 0}
+#toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,90px);background:#111;color:#fff;padding:13px 22px;border-radius:12px;font-weight:700;transition:transform .3s;z-index:20}
+#toast.show{transform:translate(-50%,0)}
+:focus-visible{outline:3px solid #2be08a;outline-offset:2px}
+@media(max-width:760px){.modal{grid-template-columns:1fr}.modal .l{border-radius:22px 22px 0 0}nav,.hero,.bar,.grid{padding-left:16px;padding-right:16px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">Sole<b>X</b></div>
+  <input class="search" id="q" placeholder="Search sneakers" aria-label="Search sneakers">
+  <span id="coins" style="font-weight:700"></span>
+  <a class="lnk" id="inv" href="#">My inventory</a>
+  <button class="cta" id="auth">Sign in with Google</button>
+</nav>
+<div class="tick"><div id="tick"></div></div>
+<section class="hero">
+  <h1>The market for sneakers you designed.</h1>
+  <p>Buy with coins. Every pair goes straight into your SoleSmith inventory, where you can trade it with other players.</p>
+</section>
+<div class="bar" id="filters"></div>
+<div class="grid" id="grid"></div>
+
+<div class="ov" id="ov"><div class="modal" id="modal"></div></div>
+<div id="toast"></div>
+<script>
+const $=s=>document.querySelector(s);
+const PARTS=7;
+const RC={Common:'#8a8497',Rare:'#2e86ff',Epic:'#a855f7',Legendary:'#e08a00'};
+const PRE=[
+['Midnight Runner',['#14141c','#2e86ff','#2e86ff','#ffffff','#ffffff','#ffffff','#2e86ff'],'matte'],
+['Sunset Drift',['#ff7a1a','#ff4fa3','#6c3cff','#ffd23f','#ffffff','#ffffff','#0b0b0f'],'glossy'],
+['Arctic Pulse',['#ffffff','#b5b5c3','#b5b5c3','#00c2a8','#0b0b0f','#ffffff','#b5b5c3'],'matte'],
+['Toxic Lime',['#0b0b0f','#c0ff3d','#c0ff3d','#c0ff3d','#c0ff3d','#0b0b0f','#c0ff3d'],'glossy'],
+['Royal Flush',['#6c3cff','#ffd23f','#ffd23f','#ffd23f','#ffffff','#ffffff','#0b0b0f'],'glitter'],
+['Sandstorm',['#f2e3c6','#7a4a2b','#7a4a2b','#ffffff','#7a4a2b','#ffffff','#7a4a2b'],'matte'],
+['Crimson Court',['#e63946','#ffffff','#ffffff','#0b0b0f','#ffffff','#ffffff','#0b0b0f'],'matte'],
+['Mint Condition',['#9be8d8','#ffffff','#ffffff','#2e86ff','#ffffff','#ffffff','#9be8d8'],'glossy'],
+['Phantom',['#0b0b0f','#1c1c26','#1c1c26','#2a2a35','#0b0b0f','#0b0b0f','#1c1c26'],'glossy'],
+['Bubblegum Bounce',['#ff4fa3','#ffffff','#ffffff','#ffffff','#ffffff','#ffd6ec','#ff4fa3'],'glitter'],
+['Golden Hour',['#ffd23f','#ff7a1a','#ff7a1a','#ffffff','#0b0b0f','#ffffff','#ff7a1a'],'glossy'],
+['Deep Sea',['#12305a','#2e86ff','#2e86ff','#00c2a8','#ffffff','#ffffff','#0b0b0f'],'glitter']
+].map(p=>({n:p[0],c:p[1],f:p[2]}));
+
+function shoeSVG(c,f){
+ const UP='M40 148 L38 66 Q40 50 62 50 L100 52 Q118 92 150 96 L165 60 L200 58 L215 92 Q330 98 372 132 Q390 146 388 150 Z';
+ let laces='';for(let i=0;i<4;i++){const x=172+i*15,y=68+i*8;laces+=`<line x1="${x-12}" y1="${y+6}" x2="${x+14}" y2="${y-2}" stroke="${c[4]}" stroke-width="4" stroke-linecap="round"/>`}
+ const fx=f==='glossy'?`<path d="${UP}" fill="url(#gl)"/>`:f==='glitter'?`<path d="${UP}" fill="url(#gt)"/>`:'';
+ return `<svg viewBox="0 0 420 220" style="width:100%;display:block" xmlns="http://www.w3.org/2000/svg"><defs>
+ <linearGradient id="gl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".6"/><stop offset=".6" stop-color="#fff" stop-opacity="0"/></linearGradient>
+ <pattern id="gt" width="8" height="8" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.1" fill="#fff" opacity=".8"/><circle cx="6" cy="6" r=".9" fill="#fff" opacity=".5"/></pattern></defs>
+ <ellipse cx="210" cy="198" rx="170" ry="7" fill="#000" opacity=".12"/>
+ <g stroke="rgba(0,0,0,.35)" stroke-width="1.5" stroke-linejoin="round">
+ <path d="M30 172 H386 Q384 192 355 192 H60 Q34 192 30 172 Z" fill="${c[6]}"/>
+ <path d="M28 148 H388 V166 Q388 180 360 180 H58 Q28 180 28 162 Z" fill="${c[5]}"/>
+ <path d="${UP}" fill="${c[0]}"/>
+ <path d="M296 98 Q360 106 372 132 Q390 146 388 150 L300 150 Q316 124 296 98 Z" fill="${c[1]}"/>
+ <path d="M38 148 L38 66 Q40 50 62 50 L82 51 Q96 100 86 148 Z" fill="${c[2]}"/>
+ <path d="M96 138 C150 152 245 134 305 104 C252 124 200 118 150 108 C124 103 104 114 96 138 Z" fill="${c[3]}"/>
+ <path d="M150 96 L165 60 L200 58 L215 92 Q182 102 150 96 Z" fill="${c[0]}"/>
+ <path d="M150 96 L165 60 L200 58 L215 92 Q182 102 150 96 Z" fill="#000" opacity=".12"/>
+ </g>${laces}${fx}</svg>`;
+}
+function score(d){let h=0;(d.n+d.c.join()+d.f).split('').forEach(ch=>h=(h*31+ch.charCodeAt(0))%97);
+ return Math.min(99,35+new Set(d.c).size*7+h%20+(d.f!=='matte'?8:0))}
+const rarity=s=>s>=85?'Legendary':s>=70?'Epic':s>=55?'Rare':'Common';
+const rng=s=>()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+const hash=str=>{let h=2166136261;for(const ch of str){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0};
+const $$=n=>'$'+n.toLocaleString();
+const SIZES=['6','7','7.5','8','8.5','9','9.5','10','10.5','11','12','13'];
+
+function build(d,tag){
+ const r=rng(hash(d.n+d.c.join())),sc=score(d),retail=Math.round((140+r()*80)/5)*5;
+ const price=Math.round(retail*(0.9+sc/55+r()*.3));
+ let p=price*.78;const hist=[];for(let i=0;i<12;i++){p*=.96+r()*.1;hist.push(p)}
+ const k=price/hist[11];const H=hist.map(v=>Math.round(v*k));
+ return{...d,id:hash(d.n+d.c.join()),sc,rar:rarity(sc),retail,price,hist:H,tag,
+  sold:Math.floor(20+r()*900*sc/60),chg:+((H[11]/H[10]-1)*100).toFixed(1),
+  asks:SIZES.map(()=>Math.round(price*(.94+r()*.22)))};
+}
+let ITEMS=PRE.map(d=>build(d)),filt='All',bag=[],cur=null,curSz=null;
+
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2400)}
+function draw(){
+ const q=$('#q').value.toLowerCase(),s=$('#sort')?$('#sort').value:'trend';
+ let L=ITEMS.filter(i=>(filt==='All'||i.rar===filt)&&i.n.toLowerCase().includes(q));
+ L.sort((a,b)=>s==='lo'?a.price-b.price:s==='hi'?b.price-a.price:s==='sold'?b.sold-a.sold:b.chg-a.chg);
+ $('#grid').innerHTML=L.length?L.map(i=>`<div class="card" tabindex="0" data-id="${i.id}"><div class="pic"><span class="tag" style="background:${RC[i.rar]}">${i.tag||i.rar}</span>${shoeSVG(i.c,i.f)}</div>
+ <div class="info"><h4>${i.n.replace(/</g,'&lt;')}</h4><small>Retail ${$$(i.retail)}</small><div class="price">${$$(Math.min(...i.asks))}</div><small>Lowest ask</small>
+ <div class="${i.chg>=0?'up':'dn'}" style="margin-top:6px">${i.chg>=0?'+':''}${i.chg}% &middot; ${i.sold.toLocaleString()} sold</div></div></div>`).join(''):'<p style="padding:30px">No sneakers match. Try another search or filter.</p>';
+}
+function bars(){
+ $('#filters').innerHTML=['All','Legendary','Epic','Rare','Common'].map(f=>`<button class="f ${f===filt?'on':''}" data-f="${f}">${f}</button>`).join('')+
+ `<select id="sort" aria-label="Sort"><option value="trend">Trending</option><option value="sold">Most sold</option><option value="lo">Price: low to high</option><option value="hi">Price: high to low</option></select>`;
+ $('#sort').onchange=draw;
+}
+function chart(h){
+ const w=420,ht=130,mn=Math.min(...h)*.95,mx=Math.max(...h)*1.05;
+ const pts=h.map((v,i)=>[i*(w/11),ht-(v-mn)/(mx-mn)*ht]);
+ const line=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+ return `<svg viewBox="0 0 ${w} ${ht+4}" style="width:100%;background:#fff;border-radius:12px"><path d="${line} L${w} ${ht} L0 ${ht} Z" fill="rgba(0,168,90,.12)"/><path d="${line}" fill="none" stroke="#00a85a" stroke-width="3" stroke-linejoin="round"/></svg>`;
+}
+function open(id){
+ cur=ITEMS.find(i=>i.id==id);curSz=null;
+ const i=cur,lo=Math.min(...i.asks);
+ $('#modal').innerHTML=`<button class="x" id="cl" aria-label="Close">&times;</button>
+ <div class="l">${shoeSVG(i.c,i.f)}<div><small style="color:#6b6b6b">12-month price</small>${chart(i.hist)}</div></div>
+ <div class="rt"><h2>${i.n.replace(/</g,'&lt;')}</h2><span class="tag" style="position:static;display:inline-block;margin-top:8px;background:${RC[i.rar]}">${i.rar}</span>
+ <div class="stats"><div>Last sale<b>${$$(i.hist[11])}</b></div><div>12-mo high<b>${$$(Math.max(...i.hist))}</b></div><div>12-mo low<b>${$$(Math.min(...i.hist))}</b></div></div>
+ <b>Select size (US)</b><div class="sizes">${SIZES.map((s,k)=>`<button class="sz" data-k="${k}">${s}<small>${$$(i.asks[k])}</small></button>`).join('')}</div>
+ <div class="btns" style="grid-template-columns:1fr"><button class="b g" id="buy">Buy now &middot; <span id="bp">${$$(lo)}</span></button></div>
+ <p style="color:var(--mut);font-size:13px;margin-top:14px">Retail ${$$(i.retail)} &middot; ${i.sold.toLocaleString()} sold &middot; Hype ${i.sc}/99</p></div>`;
+ $('#ov').classList.add('on');
+}
+$('#grid').onclick=e=>{const c=e.target.closest('.card');if(c)open(c.dataset.id)};
+$('#grid').onkeydown=e=>{if(e.key==='Enter'){const c=e.target.closest('.card');if(c)open(c.dataset.id)}};
+$('#modal').onclick=e=>{
+ if(e.target.id==='cl')return $('#ov').classList.remove('on');
+ const s=e.target.closest('.sz');
+ if(s){curSz=+s.dataset.k;document.querySelectorAll('.sz').forEach(z=>z.classList.toggle('on',z===s));$('#bp').textContent=$$(cur.asks[curSz]);return}
+ if(e.target.id==='buy')purchase();
+};
+$('#ov').onclick=e=>{if(e.target.id==='ov')$('#ov').classList.remove('on')};
+$('#filters').onclick=e=>{if(e.target.dataset.f){filt=e.target.dataset.f;bars();draw()}};
+$('#q').oninput=draw;
+$('#tick').innerHTML=ITEMS.slice(0,10).map(i=>`<span>${i.n} <b>${$$(i.hist[11])}</b> size ${SIZES[Math.floor(i.asks[0]%SIZES.length)]}</span>`).join('');
+bars();draw();
+const FB={apiKey:"PASTE_HERE",authDomain:"PASTE_HERE",databaseURL:"PASTE_HERE",projectId:"PASTE_HERE",appId:"PASTE_HERE"};
+const OTHER_URL="https://YOUR-NAME.github.io/REPO-NAME/";
+let auth,db;try{firebase.initializeApp(FB);auth=firebase.auth();db=firebase.database()}catch(e){console.warn("Add your Firebase config",e);auth={onAuthStateChanged(){},signOut(){},signInWithPopup(){return Promise.reject({code:"add-your-firebase-config"})}}}
+const esc=t=>String(t).replace(/[<>&"]/g,"");
+let me=null,coins=0;
+$("#auth").onclick=()=>me?auth.signOut():auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>toast("Sign in failed: "+e.code));
+$("#inv").href=OTHER_URL;
+function paint(){$("#auth").textContent=me?"Sign out":"Sign in with Google";$("#coins").textContent=me?coins.toLocaleString()+" coins":""}
+auth.onAuthStateChanged(async u=>{me=u;if(!u){coins=0;paint();return}
+ const r=db.ref("users/"+u.uid),s=await r.get();if(!s.exists())await r.set({name:u.displayName||"Player",coins:1000});
+ r.child("coins").on("value",v=>{coins=v.val()||0;paint()})});
+async function purchase(){
+ if(!me)return toast("Sign in with Google to buy");
+ if(curSz===null)return toast("Pick a size first");
+ const price=cur.asks[curSz];
+ const r=await db.ref("users/"+me.uid+"/coins").transaction(v=>(v||0)>=price?v-price:undefined);
+ if(!r.committed)return toast("Not enough coins");
+ await db.ref("inv/"+me.uid).push({n:cur.n,c:cur.c,f:cur.f,z:SIZES[curSz],r:cur.rar,paid:price,ts:Date.now()});
+ $("#ov").classList.remove("on");toast("Bought "+cur.n+" in size "+SIZES[curSz]+". Find it in your inventory.");
+}
+bars();draw();
+</script>
+</body>
+</html>
