@@ -104,25 +104,39 @@ select{margin-left:auto;padding:9px 14px;border-radius:99px;border:1px solid var
 const $=s=>document.querySelector(s);
 const PARTS=7;
 const RC={Common:'#8a8497',Rare:'#2e86ff',Epic:'#a855f7',Legendary:'#e08a00'};
-const PRE=[
-['Midnight Runner',['#14141c','#2e86ff','#2e86ff','#ffffff','#ffffff','#ffffff','#2e86ff'],'matte'],
-['Sunset Drift',['#ff7a1a','#ff4fa3','#6c3cff','#ffd23f','#ffffff','#ffffff','#0b0b0f'],'glossy'],
-['Arctic Pulse',['#ffffff','#b5b5c3','#b5b5c3','#00c2a8','#0b0b0f','#ffffff','#b5b5c3'],'matte'],
-['Toxic Lime',['#0b0b0f','#c0ff3d','#c0ff3d','#c0ff3d','#c0ff3d','#0b0b0f','#c0ff3d'],'glossy'],
-['Royal Flush',['#6c3cff','#ffd23f','#ffd23f','#ffd23f','#ffffff','#ffffff','#0b0b0f'],'glitter'],
-['Sandstorm',['#f2e3c6','#7a4a2b','#7a4a2b','#ffffff','#7a4a2b','#ffffff','#7a4a2b'],'matte'],
-['Crimson Court',['#e63946','#ffffff','#ffffff','#0b0b0f','#ffffff','#ffffff','#0b0b0f'],'matte'],
-['Mint Condition',['#9be8d8','#ffffff','#ffffff','#2e86ff','#ffffff','#ffffff','#9be8d8'],'glossy'],
-['Phantom',['#0b0b0f','#1c1c26','#1c1c26','#2a2a35','#0b0b0f','#0b0b0f','#1c1c26'],'glossy'],
-['Bubblegum Bounce',['#ff4fa3','#ffffff','#ffffff','#ffffff','#ffffff','#ffd6ec','#ff4fa3'],'glitter'],
-['Golden Hour',['#ffd23f','#ff7a1a','#ff7a1a','#ffffff','#0b0b0f','#ffffff','#ff7a1a'],'glossy'],
-['Deep Sea',['#12305a','#2e86ff','#2e86ff','#00c2a8','#ffffff','#ffffff','#0b0b0f'],'glitter']
-].map(p=>({n:p[0],c:p[1],f:p[2]}));
-
-const PR=[420,650,380,510,890,300,340,450,720,560,980,610];PRE.forEach((d,i)=>d.price=PR[i]);
-function shoeSVG(c,f){
- const UP='M40 148 L38 66 Q40 50 62 50 L100 52 Q118 92 150 96 L165 60 L200 58 L215 92 Q330 98 372 132 Q390 146 388 150 Z';
- let laces='';for(let i=0;i<4;i++){const x=172+i*15,y=68+i*8;laces+=`<line x1="${x-12}" y1="${y+6}" x2="${x+14}" y2="${y-2}" stroke="${c[4]}" stroke-width="4" stroke-linecap="round"/>`}
+const BASE=[
+['Midnight Runner',['#14141c','#2e86ff','#2e86ff','#ffffff','#ffffff','#ffffff','#2e86ff'],'matte',420],
+['Sunset Drift',['#ff7a1a','#ff4fa3','#6c3cff','#ffd23f','#ffffff','#ffffff','#0b0b0f'],'glossy',650],
+['Arctic Pulse',['#ffffff','#b5b5c3','#b5b5c3','#00c2a8','#0b0b0f','#ffffff','#b5b5c3'],'matte',380],
+['Toxic Lime',['#0b0b0f','#c0ff3d','#c0ff3d','#c0ff3d','#c0ff3d','#0b0b0f','#c0ff3d'],'glossy',510],
+['Royal Flush',['#6c3cff','#ffd23f','#ffd23f','#ffd23f','#ffffff','#ffffff','#0b0b0f'],'glitter',890],
+['Sandstorm',['#f2e3c6','#7a4a2b','#7a4a2b','#ffffff','#7a4a2b','#ffffff','#7a4a2b'],'matte',300],
+['Crimson Court',['#e63946','#ffffff','#ffffff','#0b0b0f','#ffffff','#ffffff','#0b0b0f'],'matte',340],
+['Mint Condition',['#9be8d8','#ffffff','#ffffff','#2e86ff','#ffffff','#ffffff','#9be8d8'],'glossy',450],
+['Phantom',['#0b0b0f','#1c1c26','#1c1c26','#2a2a35','#0b0b0f','#0b0b0f','#1c1c26'],'glossy',720],
+['Bubblegum Bounce',['#ff4fa3','#ffffff','#ffffff','#ffffff','#ffffff','#ffd6ec','#ff4fa3'],'glitter',560],
+['Golden Hour',['#ffd23f','#ff7a1a','#ff7a1a','#ffffff','#0b0b0f','#ffffff','#ff7a1a'],'glossy',980],
+['Deep Sea',['#12305a','#2e86ff','#2e86ff','#00c2a8','#ffffff','#ffffff','#0b0b0f'],'glitter',610],
+['Retro Lightning',['#0b0b0f','#ffd23f','#ffd23f','#ffd23f','#ffd23f','#ffffff','#0b0b0f'],'glossy',800],
+['Volt Cyclone',['#c0ff3d','#0b0b0f','#0b0b0f','#ffffff','#0b0b0f','#ffffff','#c0ff3d'],'matte',540],
+['Neon Tiger',['#ff7a1a','#0b0b0f','#0b0b0f','#0b0b0f','#ffd23f','#ffffff','#0b0b0f'],'glossy',620],
+['Cherry Blossom',['#ffd6ec','#ff4fa3','#ff4fa3','#ffffff','#ff4fa3','#ffffff','#ffd6ec'],'glitter',410],
+['Obsidian',['#14141c','#6c3cff','#14141c','#6c3cff','#14141c','#14141c','#6c3cff'],'glossy',760],
+['Lagoon',['#00c2a8','#ffffff','#2e86ff','#ffffff','#ffffff','#ffffff','#2e86ff'],'matte',350],
+['Copper Rush',['#7a4a2b','#ff7a1a','#ff7a1a','#f2e3c6','#f2e3c6','#f2e3c6','#7a4a2b'],'glitter',480]
+];
+const PRE=[...BASE.map(b=>({n:'Low '+b[0],c:b[1],f:b[2],price:b[3]})),...BASE.map(b=>({n:'High '+b[0],c:b[1],f:b[2],price:Math.round(b[3]*1.3/10)*10}))];
+function shoeSVG(c,f,n){
+ n=n||'';const hi=n.startsWith('High '),bolt=/Lightning/.test(n);
+ const UP=hi?'M40 148 L36 38 Q38 12 66 12 L116 14 Q136 22 146 54 L162 16 L204 12 L222 94 Q330 100 372 132 Q390 146 388 150 Z':'M40 148 L38 66 Q40 50 62 50 L100 52 Q118 92 150 96 L165 60 L200 58 L215 92 Q330 98 372 132 Q390 146 388 150 Z';
+ const HEEL=hi?'M38 148 L36 38 Q38 12 66 12 L88 13 Q100 90 88 148 Z':'M38 148 L38 66 Q40 50 62 50 L82 51 Q96 100 86 148 Z';
+ const TONG=hi?'M146 54 L162 16 L204 12 L222 94 Q184 104 150 96 Z':'M150 96 L165 60 L200 58 L215 92 Q182 102 150 96 Z';
+ const STR=bolt?'M172 92 L132 124 L152 124 L138 146 L188 112 L166 112 L182 92 Z':'M96 138 C150 152 245 134 305 104 C252 124 200 118 150 108 C124 103 104 114 96 138 Z';
+ const L=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c[4]}" stroke-width="4" stroke-linecap="round"/>`;
+ let laces='';
+ if(hi){for(let y=30;y<=90;y+=12){const xl=y<54?146+(54-y)/38*16:146+(y-54)/42*4,xr=204+(y-12)/82*18;laces+=L(xl+4,y+4,xr-4,y-4)}}
+ else{for(let i=0;i<4;i++){const x=172+i*15,y=68+i*8;laces+=L(x-12,y+6,x+14,y-2)}}
+ const patch=hi?`<circle cx="62" cy="50" r="13" fill="${c[3]}"/><circle cx="62" cy="50" r="6" fill="${c[2]}"/>`:'';
  const fx=f==='glossy'?`<path d="${UP}" fill="url(#gl)"/>`:f==='glitter'?`<path d="${UP}" fill="url(#gt)"/>`:'';
  return `<svg viewBox="0 0 420 220" style="width:100%;display:block" xmlns="http://www.w3.org/2000/svg"><defs>
  <linearGradient id="gl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".6"/><stop offset=".6" stop-color="#fff" stop-opacity="0"/></linearGradient>
@@ -133,11 +147,11 @@ function shoeSVG(c,f){
  <path d="M28 148 H388 V166 Q388 180 360 180 H58 Q28 180 28 162 Z" fill="${c[5]}"/>
  <path d="${UP}" fill="${c[0]}"/>
  <path d="M296 98 Q360 106 372 132 Q390 146 388 150 L300 150 Q316 124 296 98 Z" fill="${c[1]}"/>
- <path d="M38 148 L38 66 Q40 50 62 50 L82 51 Q96 100 86 148 Z" fill="${c[2]}"/>
- <path d="M96 138 C150 152 245 134 305 104 C252 124 200 118 150 108 C124 103 104 114 96 138 Z" fill="${c[3]}"/>
- <path d="M150 96 L165 60 L200 58 L215 92 Q182 102 150 96 Z" fill="${c[0]}"/>
- <path d="M150 96 L165 60 L200 58 L215 92 Q182 102 150 96 Z" fill="#000" opacity=".12"/>
- </g>${laces}${fx}</svg>`;
+ <path d="${HEEL}" fill="${c[2]}"/>
+ <path d="${STR}" fill="${c[3]}"/>
+ <path d="${TONG}" fill="${c[0]}"/>
+ <path d="${TONG}" fill="#000" opacity=".12"/>
+ </g>${patch}${laces}${fx}</svg>`;
 }
 function score(d){let h=0;(d.n+d.c.join()+d.f).split('').forEach(ch=>h=(h*31+ch.charCodeAt(0))%97);
  return Math.min(99,35+new Set(d.c).size*7+h%20+(d.f!=='matte'?8:0))}
@@ -161,14 +175,14 @@ let ITEMS=PRE.map(d=>build(d)),filt='All',bag=[],cur=null,curSz=null;
 function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2400)}
 function draw(){
  const q=$('#q').value.toLowerCase(),s=$('#sort')?$('#sort').value:'trend';
- let L=ITEMS.filter(i=>(filt==='All'||i.rar===filt)&&i.n.toLowerCase().includes(q));
+ let L=ITEMS.filter(i=>(filt==='All'||i.rar===filt||i.n.startsWith(filt+' '))&&i.n.toLowerCase().includes(q));
  L.sort((a,b)=>s==='lo'?a.price-b.price:s==='hi'?b.price-a.price:s==='sold'?b.sold-a.sold:b.chg-a.chg);
- $('#grid').innerHTML=L.length?L.map(i=>`<div class="card" tabindex="0" data-id="${i.id}"><div class="pic"><span class="tag" style="background:${RC[i.rar]}">${i.tag||i.rar}</span>${shoeSVG(i.c,i.f)}</div>
+ $('#grid').innerHTML=L.length?L.map(i=>`<div class="card" tabindex="0" data-id="${i.id}"><div class="pic"><span class="tag" style="background:${RC[i.rar]}">${i.tag||i.rar}</span>${shoeSVG(i.c,i.f,i.n)}</div>
  <div class="info"><h4>${i.n.replace(/</g,'&lt;')}</h4><small>Retail ${$$(i.retail)}</small><div class="price">${$$(Math.min(...i.asks))}</div><small>Lowest ask</small>
  <div class="${i.chg>=0?'up':'dn'}" style="margin-top:6px">${i.chg>=0?'+':''}${i.chg}% &middot; ${i.sold.toLocaleString()} sold</div></div></div>`).join(''):'<p style="padding:30px">No sneakers match. Try another search or filter.</p>';
 }
 function bars(){
- $('#filters').innerHTML=['All','Legendary','Epic','Rare','Common'].map(f=>`<button class="f ${f===filt?'on':''}" data-f="${f}">${f}</button>`).join('')+
+ $('#filters').innerHTML=['All','Low','High','Legendary','Epic','Rare','Common'].map(f=>`<button class="f ${f===filt?'on':''}" data-f="${f}">${f}</button>`).join('')+
  `<select id="sort" aria-label="Sort"><option value="trend">Trending</option><option value="sold">Most sold</option><option value="lo">Price: low to high</option><option value="hi">Price: high to low</option></select>`;
  $('#sort').onchange=draw;
 }
@@ -182,7 +196,7 @@ function open(id){
  cur=ITEMS.find(i=>i.id==id);curSz=null;
  const i=cur,lo=Math.min(...i.asks);
  $('#modal').innerHTML=`<button class="x" id="cl" aria-label="Close">&times;</button>
- <div class="l">${shoeSVG(i.c,i.f)}<div><small style="color:#6b6b6b">12-month price</small>${chart(i.hist)}</div></div>
+ <div class="l">${shoeSVG(i.c,i.f,i.n)}<div><small style="color:#6b6b6b">12-month price</small>${chart(i.hist)}</div></div>
  <div class="rt"><h2>${i.n.replace(/</g,'&lt;')}</h2><span class="tag" style="position:static;display:inline-block;margin-top:8px;background:${RC[i.rar]}">${i.rar}</span>
  <div class="stats"><div>Last sale<b>${$$(i.hist[11])}</b></div><div>12-mo high<b>${$$(Math.max(...i.hist))}</b></div><div>12-mo low<b>${$$(Math.min(...i.hist))}</b></div></div>
  <b>Select size (US)</b><div class="sizes">${SIZES.map((s,k)=>`<button class="sz" data-k="${k}">${s}<small>${$$(i.asks[k])}</small></button>`).join('')}</div>
@@ -255,7 +269,7 @@ function drawDrop(){
  const d=DROP,s=d.shoe,left=d.stock-d.sold,key=d.slot+"-"+d.sold;
  if(el.dataset.k===key)return;el.dataset.k=key;
  el.className="dropc";
- el.innerHTML=`<div class="dl">${shoeSVG(s.c,s.f)}</div><div><span class="live">${d.stock<=2?"RARE DROP":"LIVE DROP"}</span><h2>${s.n}</h2><p>Worth about ${$$(d.value)} &middot; Drop price ${$$(d.price)} &middot; Size ${d.size} (automatic) &middot; ${left} of ${d.stock} left</p><div class="dact"><button class="b g" id="dbuy" ${left<1?"disabled":""}>${left<1?"Sold out":"Buy drop"}</button><b id="dcd"></b></div></div>`;
+ el.innerHTML=`<div class="dl">${shoeSVG(s.c,s.f,s.n)}</div><div><span class="live">${d.stock<=2?"RARE DROP":"LIVE DROP"}</span><h2>${s.n}</h2><p>Worth about ${$$(d.value)} &middot; Drop price ${$$(d.price)} &middot; Size ${d.size} (automatic) &middot; ${left} of ${d.stock} left</p><div class="dact"><button class="b g" id="dbuy" ${left<1?"disabled":""}>${left<1?"Sold out":"Buy drop"}</button><b id="dcd"></b></div></div>`;
 }
 $("#drop").onclick=async e=>{
  if(e.target.id!=="dbuy")return;
