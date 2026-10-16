@@ -80,6 +80,7 @@ select{margin-left:auto;padding:9px 14px;border-radius:99px;border:1px solid var
   <div class="logo">Sole<b>X</b></div>
   <input class="search" id="q" type="search" name="shoe-search" autocomplete="off" placeholder="Search sneakers" aria-label="Search sneakers">
   <span id="coins" style="font-weight:700"></span>
+  <a class="lnk" id="how" href="#">How to play</a>
   <a class="lnk" id="inv" href="#">My inventory</a>
   <button class="cta" id="auth">Sign in</button>
 </nav>
@@ -103,7 +104,7 @@ select{margin-left:auto;padding:9px 14px;border-radius:99px;border:1px solid var
 <script>
 const $=s=>document.querySelector(s);
 const PARTS=7;
-const RC={Common:'#8a8497',Rare:'#2e86ff',Epic:'#a855f7',Legendary:'#e08a00'};
+const RC={Common:'#8a8497',Rare:'#2e86ff',Epic:'#a855f7',Legendary:'#e08a00',Grail:'#e11d48'};
 const BASE=[
 ['Midnight Runner',['#14141c','#2e86ff','#2e86ff','#ffffff','#ffffff','#ffffff','#2e86ff'],'matte',420],
 ['Sunset Drift',['#ff7a1a','#ff4fa3','#6c3cff','#ffd23f','#ffffff','#ffffff','#0b0b0f'],'glossy',650],
@@ -126,8 +127,57 @@ const BASE=[
 ['Copper Rush',['#7a4a2b','#ff7a1a','#ff7a1a','#f2e3c6','#f2e3c6','#f2e3c6','#7a4a2b'],'glitter',480]
 ];
 const PRE=[...BASE.map(b=>({n:'Low '+b[0],c:b[1],f:b[2],price:b[3]})),...BASE.map(b=>({n:'High '+b[0],c:b[1],f:b[2],price:Math.round(b[3]*1.3/10)*10}))];
-function shoeSVG(c,f,n){
- n=n||'';const hi=n.startsWith('High '),bolt=/Lightning/.test(n);
+const SETD=[
+['Grateful Dead','Dancing Bears',['#e63946','#2ecc71','#6c3cff','#ffd23f','#ffffff','#2e86ff','#0b0b0f'],'matte',600,false],
+['Grateful Dead','Terrapin',['#ffd23f','#6c3cff','#ff7a1a','#2ecc71','#0b0b0f','#ffffff','#2e86ff'],'glossy',640,false],
+['Grateful Dead','Truckin',['#2ecc71','#ff7a1a','#2e86ff','#6c3cff','#ffffff','#ffffff','#0b0b0f'],'glitter',680,false],
+['Grateful Dead','Ripple',['#6c3cff','#2e86ff','#ff4fa3','#ff7a1a','#0b0b0f','#e63946','#ffffff'],'matte',720,false],
+['Grateful Dead','Casey Jones',['#ff7a1a','#ff4fa3','#ffffff','#2e86ff','#ffffff','#ffffff','#0b0b0f'],'glossy',760,false],
+['Grateful Dead','Scarlet Begonias',['#2e86ff','#ffffff','#e63946','#ff4fa3','#0b0b0f','#ffffff','#ffd23f'],'glitter',960,true],
+['Grateful Dead','Fire on the Mountain',['#ff4fa3','#e63946','#ffd23f','#ffffff','#ffffff','#6c3cff','#0b0b0f'],'matte',1010,true],
+['Grateful Dead','Sugar Magnolia',['#ffffff','#ffd23f','#2ecc71','#e63946','#0b0b0f','#ffffff','#6c3cff'],'glossy',1060,true],
+['Grateful Dead','Bertha',['#e63946','#2ecc71','#6c3cff','#ffd23f','#ffffff','#ffffff','#0b0b0f'],'glitter',1100,true],
+['Jungle Fever','Emerald',['#0b6e3a','#1faa59','#b8f5c8','#2ecc71','#ffffff','#7ad67a','#0b0b0f'],'matte',350,false],
+['Jungle Fever','Jade',['#2ecc71','#b8f5c8','#00c2a8','#1faa59','#0b0b0f','#ffffff','#7ad67a'],'glossy',390,false],
+['Jungle Fever','Lime',['#1faa59','#00c2a8','#7ad67a','#b8f5c8','#ffffff','#ffffff','#0b0b0f'],'glitter',430,false],
+['Jungle Fever','Forest',['#b8f5c8','#7ad67a','#0f3d24','#00c2a8','#0b0b0f','#0b6e3a','#c0ff3d'],'matte',470,false],
+['Jungle Fever','Mint',['#00c2a8','#0f3d24','#c0ff3d','#7ad67a','#ffffff','#ffffff','#0b0b0f'],'glossy',510,false],
+['Jungle Fever','Moss',['#7ad67a','#c0ff3d','#0b6e3a','#0f3d24','#0b0b0f','#ffffff','#2ecc71'],'glitter',660,true],
+['Jungle Fever','Olive',['#0f3d24','#0b6e3a','#2ecc71','#c0ff3d','#ffffff','#b8f5c8','#0b0b0f'],'matte',710,true],
+['Jungle Fever','Pine',['#c0ff3d','#2ecc71','#1faa59','#0b6e3a','#0b0b0f','#ffffff','#b8f5c8'],'glossy',760,true],
+['Jungle Fever','Sage',['#0b6e3a','#1faa59','#b8f5c8','#2ecc71','#ffffff','#ffffff','#0b0b0f'],'glitter',800,true],
+['Desert Sun','Tangerine',['#ff7a1a','#e8590c','#ffd9a8','#ffb347','#ffffff','#ff9f40','#0b0b0f'],'matte',400,false],
+['Desert Sun','Amber',['#ffb347','#ffd9a8','#cc5500','#e8590c','#0b0b0f','#ffffff','#ff9f40'],'glossy',440,false],
+['Desert Sun','Sunset',['#e8590c','#cc5500','#ff9f40','#ffd9a8','#ffffff','#ffffff','#0b0b0f'],'glitter',480,false],
+['Desert Sun','Pumpkin',['#ffd9a8','#ff9f40','#7a2e00','#cc5500','#0b0b0f','#ff7a1a','#ffe0b3'],'matte',520,false],
+['Desert Sun','Apricot',['#cc5500','#7a2e00','#ffe0b3','#ff9f40','#ffffff','#ffffff','#0b0b0f'],'glossy',560,false],
+['Desert Sun','Rust',['#ff9f40','#ffe0b3','#ff7a1a','#7a2e00','#0b0b0f','#ffffff','#ffb347'],'glitter',720,true],
+['Desert Sun','Marigold',['#7a2e00','#ff7a1a','#ffb347','#ffe0b3','#ffffff','#ffd9a8','#0b0b0f'],'matte',770,true],
+['Desert Sun','Ember',['#ffe0b3','#ffb347','#e8590c','#ff7a1a','#0b0b0f','#ffffff','#ffd9a8'],'glossy',820,true],
+['Desert Sun','Clementine',['#ff7a1a','#e8590c','#ffd9a8','#ffb347','#ffffff','#ffffff','#0b0b0f'],'glitter',860,true],
+['Red Rocket','Crimson',['#e63946','#ff6b6b','#ffc2c2','#a4161a','#ffffff','#ff4d4d','#0b0b0f'],'matte',450,false],
+['Red Rocket','Ruby',['#a4161a','#ffc2c2','#7a0c14','#ff6b6b','#0b0b0f','#ffffff','#ff4d4d'],'glossy',490,false],
+['Red Rocket','Scarlet',['#ff6b6b','#7a0c14','#ff4d4d','#ffc2c2','#ffffff','#ffffff','#0b0b0f'],'glitter',530,false],
+['Red Rocket','Cherry',['#ffc2c2','#ff4d4d','#4a0a0f','#7a0c14','#0b0b0f','#e63946','#ffd6d6'],'matte',570,false],
+['Red Rocket','Brick',['#7a0c14','#4a0a0f','#ffd6d6','#ff4d4d','#ffffff','#ffffff','#0b0b0f'],'glossy',610,false],
+['Red Rocket','Cardinal',['#ff4d4d','#ffd6d6','#e63946','#4a0a0f','#0b0b0f','#ffffff','#a4161a'],'glitter',780,true],
+['Red Rocket','Rose',['#4a0a0f','#e63946','#a4161a','#ffd6d6','#ffffff','#ffc2c2','#0b0b0f'],'matte',830,true],
+['Red Rocket','Garnet',['#ffd6d6','#a4161a','#ff6b6b','#e63946','#0b0b0f','#ffffff','#ffc2c2'],'glossy',880,true],
+['Red Rocket','Maroon',['#e63946','#ff6b6b','#ffc2c2','#a4161a','#ffffff','#ffffff','#0b0b0f'],'glitter',920,true],
+['Deep Ocean','Cobalt',['#2e86ff','#6cb4ff','#cfe6ff','#0b3d91','#ffffff','#4aa3ff','#0b0b0f'],'matte',380,false],
+['Deep Ocean','Azure',['#0b3d91','#cfe6ff','#14307a','#6cb4ff','#0b0b0f','#ffffff','#4aa3ff'],'glossy',420,false],
+['Deep Ocean','Navy',['#6cb4ff','#14307a','#4aa3ff','#cfe6ff','#ffffff','#ffffff','#0b0b0f'],'glitter',460,false],
+['Deep Ocean','Sky',['#cfe6ff','#4aa3ff','#061b4a','#14307a','#0b0b0f','#2e86ff','#a9d2ff'],'matte',500,false],
+['Deep Ocean','Denim',['#14307a','#061b4a','#a9d2ff','#4aa3ff','#ffffff','#ffffff','#0b0b0f'],'glossy',540,false],
+['Deep Ocean','Ocean',['#4aa3ff','#a9d2ff','#2e86ff','#061b4a','#0b0b0f','#ffffff','#0b3d91'],'glitter',700,true],
+['Deep Ocean','Ice',['#061b4a','#2e86ff','#0b3d91','#a9d2ff','#ffffff','#cfe6ff','#0b0b0f'],'matte',740,true],
+['Deep Ocean','Indigo',['#a9d2ff','#0b3d91','#6cb4ff','#2e86ff','#0b0b0f','#ffffff','#cfe6ff'],'glossy',790,true],
+['Deep Ocean','Cerulean',['#2e86ff','#6cb4ff','#cfe6ff','#0b3d91','#ffffff','#ffffff','#0b0b0f'],'glitter',840,true]
+];
+SETD.forEach(s=>PRE.push({n:s[0]+' '+s[1]+' (Set '+s[0]+')',c:s[2],f:s[3],price:s[4],h:s[5],set:s[0]}));
+const SETN=[...new Set(SETD.map(s=>s[0]))];
+function shoeSVG(c,f,n,h){
+ n=n||'';const hi=!!h||n.startsWith('High '),bolt=/Lightning/.test(n);
  const UP=hi?'M40 148 L36 38 Q38 12 66 12 L116 14 Q136 22 146 54 L162 16 L204 12 L222 94 Q330 100 372 132 Q390 146 388 150 Z':'M40 148 L38 66 Q40 50 62 50 L100 52 Q118 92 150 96 L165 60 L200 58 L215 92 Q330 98 372 132 Q390 146 388 150 Z';
  const HEEL=hi?'M38 148 L36 38 Q38 12 66 12 L88 13 Q100 90 88 148 Z':'M38 148 L38 66 Q40 50 62 50 L82 51 Q96 100 86 148 Z';
  const TONG=hi?'M146 54 L162 16 L204 12 L222 94 Q184 104 150 96 Z':'M150 96 L165 60 L200 58 L215 92 Q182 102 150 96 Z';
@@ -177,12 +227,12 @@ function draw(){
  const q=$('#q').value.toLowerCase(),s=$('#sort')?$('#sort').value:'trend';
  let L=ITEMS.filter(i=>(filt==='All'||i.rar===filt||i.n.startsWith(filt+' '))&&i.n.toLowerCase().includes(q));
  L.sort((a,b)=>s==='lo'?a.price-b.price:s==='hi'?b.price-a.price:s==='sold'?b.sold-a.sold:b.chg-a.chg);
- $('#grid').innerHTML=L.length?L.map(i=>`<div class="card" tabindex="0" data-id="${i.id}"><div class="pic"><span class="tag" style="background:${RC[i.rar]}">${i.tag||i.rar}</span>${shoeSVG(i.c,i.f,i.n)}</div>
+ $('#grid').innerHTML=L.length?L.map(i=>`<div class="card" tabindex="0" data-id="${i.id}"><div class="pic"><span class="tag" style="background:${RC[i.rar]}">${i.tag||i.rar}</span>${shoeSVG(i.c,i.f,i.n,i.h)}</div>
  <div class="info"><h4>${i.n.replace(/</g,'&lt;')}</h4><small>Retail ${$$(i.retail)}</small><div class="price">${$$(Math.min(...i.asks))}</div><small>Lowest ask</small>
  <div class="${i.chg>=0?'up':'dn'}" style="margin-top:6px">${i.chg>=0?'+':''}${i.chg}% &middot; ${i.sold.toLocaleString()} sold</div></div></div>`).join(''):'<p style="padding:30px">No sneakers match. Try another search or filter.</p>';
 }
 function bars(){
- $('#filters').innerHTML=['All','Low','High','Legendary','Epic','Rare','Common'].map(f=>`<button class="f ${f===filt?'on':''}" data-f="${f}">${f}</button>`).join('')+
+ $('#filters').innerHTML=['All','Low','High',...SETN,'Legendary','Epic','Rare','Common'].map(f=>`<button class="f ${f===filt?'on':''}" data-f="${f}">${f}</button>`).join('')+
  `<select id="sort" aria-label="Sort"><option value="trend">Trending</option><option value="sold">Most sold</option><option value="lo">Price: low to high</option><option value="hi">Price: high to low</option></select>`;
  $('#sort').onchange=draw;
 }
@@ -196,7 +246,7 @@ function open(id){
  cur=ITEMS.find(i=>i.id==id);curSz=null;
  const i=cur,lo=Math.min(...i.asks);
  $('#modal').innerHTML=`<button class="x" id="cl" aria-label="Close">&times;</button>
- <div class="l">${shoeSVG(i.c,i.f,i.n)}<div><small style="color:#6b6b6b">12-month price</small>${chart(i.hist)}</div></div>
+ <div class="l">${shoeSVG(i.c,i.f,i.n,i.h)}<div><small style="color:#6b6b6b">12-month price</small>${chart(i.hist)}</div></div>
  <div class="rt"><h2>${i.n.replace(/</g,'&lt;')}</h2><span class="tag" style="position:static;display:inline-block;margin-top:8px;background:${RC[i.rar]}">${i.rar}</span>
  <div class="stats"><div>Last sale<b>${$$(i.hist[11])}</b></div><div>12-mo high<b>${$$(Math.max(...i.hist))}</b></div><div>12-mo low<b>${$$(Math.min(...i.hist))}</b></div></div>
  <b>Select size (US)</b><div class="sizes">${SIZES.map((s,k)=>`<button class="sz" data-k="${k}">${s}<small>${$$(i.asks[k])}</small></button>`).join('')}</div>
@@ -222,7 +272,7 @@ setTimeout(()=>{const q=$("#q");if(q.value){q.value="";draw()}},500);
 const SB=supabase.createClient("https://xqftxszpozrpuzhsnyho.supabase.co","sb_publishable_IBatpScfMC8L4Ys93DQWMg_GJKLyD3B");
 const GAME="https://mohamednaser2143-sudo.github.io/solesmith/";
 let me=null,coins=0;
-$("#inv").href=GAME;
+$("#inv").href=GAME;$("#how").href=GAME+"how-to-play.html";
 function paint(){$("#auth").textContent=me?"Sign out":"Sign in";$("#coins").textContent=me?coins.toLocaleString()+" coins":""}
 async function load(){
  if(!me){coins=0;return paint()}
@@ -269,7 +319,7 @@ function drawDrop(){
  const d=DROP,s=d.shoe,left=d.stock-d.sold,key=d.slot+"-"+d.sold;
  if(el.dataset.k===key)return;el.dataset.k=key;
  el.className="dropc";
- el.innerHTML=`<div class="dl">${shoeSVG(s.c,s.f,s.n)}</div><div><span class="live">${d.stock<=2?"RARE DROP":"LIVE DROP"}</span><h2>${s.n}</h2><p>Worth about ${$$(d.value)} &middot; Drop price ${$$(d.price)} &middot; Size ${d.size} (automatic) &middot; ${left} of ${d.stock} left</p><div class="dact"><button class="b g" id="dbuy" ${left<1?"disabled":""}>${left<1?"Sold out":"Buy drop"}</button><b id="dcd"></b></div></div>`;
+ el.innerHTML=`<div class="dl">${shoeSVG(s.c,s.f,s.n,s.h)}</div><div><span class="live">${s.g?"GRAIL DROP":d.stock<=2?"RARE DROP":"LIVE DROP"}</span><h2>${s.n}</h2>${s.g?`<p style="color:#ffd23f;font-weight:700">Part of the ${s.g} collection. Only ONE exists in the whole game. It can only be sold to other players, never to offers.</p>`:""}<p>Worth about ${$$(d.value)} &middot; Drop price ${$$(d.price)} &middot; Size ${d.size} (automatic) &middot; ${left} of ${d.stock} left</p><div class="dact"><button class="b g" id="dbuy" ${left<1?"disabled":""}>${left<1?"Sold out":"Buy drop"}</button><b id="dcd"></b></div></div>`;
 }
 $("#drop").onclick=async e=>{
  if(e.target.id!=="dbuy")return;
