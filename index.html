@@ -62,6 +62,7 @@ select{margin-left:auto;padding:9px 14px;border-radius:99px;border:1px solid var
 #toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,90px);background:#111;color:#fff;padding:13px 22px;border-radius:12px;font-weight:700;transition:transform .3s;z-index:20}
 #toast.show{transform:translate(-50%,0)}
 :focus-visible{outline:3px solid #2be08a;outline-offset:2px}
+.qty{display:flex;align-items:center;gap:10px;margin:0 0 14px;font-weight:700}.qty input{width:80px;padding:10px;border:1px solid var(--line);border-radius:10px;font:700 15px inherit}
 .dropc{max-width:1224px;margin:6px 28px 16px;background:#111;color:#fff;border-radius:20px;display:grid;grid-template-columns:320px 1fr;gap:18px;align-items:center;padding:20px}
 @media(min-width:1280px){.dropc{margin:6px auto 16px}}
 .dropc .dl{background:#f1f1ee;border-radius:14px;padding:14px}
@@ -185,6 +186,7 @@ function open(id){
  <div class="rt"><h2>${i.n.replace(/</g,'&lt;')}</h2><span class="tag" style="position:static;display:inline-block;margin-top:8px;background:${RC[i.rar]}">${i.rar}</span>
  <div class="stats"><div>Last sale<b>${$$(i.hist[11])}</b></div><div>12-mo high<b>${$$(Math.max(...i.hist))}</b></div><div>12-mo low<b>${$$(Math.min(...i.hist))}</b></div></div>
  <b>Select size (US)</b><div class="sizes">${SIZES.map((s,k)=>`<button class="sz" data-k="${k}">${s}<small>${$$(i.asks[k])}</small></button>`).join('')}</div>
+ <div class="qty"><label for="qty">Amount</label><input id="qty" type="number" min="1" max="10" value="1"><small style="color:var(--mut);font-weight:400">up to 10 pairs</small></div>
  <div class="btns" style="grid-template-columns:1fr"><button class="b g" id="buy">Buy now &middot; <span id="bp">${$$(lo)}</span></button></div>
  <p style="color:var(--mut);font-size:13px;margin-top:14px">Retail ${$$(i.retail)} &middot; ${i.sold.toLocaleString()} sold &middot; Hype ${i.sc}/99</p></div>`;
  $('#ov').classList.add('on');
@@ -194,7 +196,7 @@ $('#grid').onkeydown=e=>{if(e.key==='Enter'){const c=e.target.closest('.card');i
 $('#modal').onclick=e=>{
  if(e.target.id==='cl')return $('#ov').classList.remove('on');
  const s=e.target.closest('.sz');
- if(s){curSz=+s.dataset.k;document.querySelectorAll('.sz').forEach(z=>z.classList.toggle('on',z===s));$('#bp').textContent=$$(cur.asks[curSz]);return}
+ if(s){curSz=+s.dataset.k;document.querySelectorAll('.sz').forEach(z=>z.classList.toggle('on',z===s));upd();return}
  if(e.target.id==='buy')purchase();
 };
 $('#ov').onclick=e=>{if(e.target.id==='ov')$('#ov').classList.remove('on')};
@@ -228,11 +230,15 @@ SB.auth.onAuthStateChange((_e,sess)=>{me=sess?sess.user:null;load()});
 async function purchase(){
  if(!me)return $("#am").classList.add("on");
  if(curSz===null)return toast("Pick a size first");
- const {data:paid,error}=await SB.rpc("buy_shop",{p_name:cur.n,p_size:SIZES[curSz]});
+ const q=Math.max(1,Math.min(10,Math.floor(+$("#qty").value)||1));
+ const {data:paid,error}=await SB.rpc("buy_shop",{p_name:cur.n,p_size:SIZES[curSz],p_qty:q});
  if(error)return toast(error.message);
  $("#ov").classList.remove("on");load();
- toast("Bought "+cur.n+" (size "+SIZES[curSz]+") for "+$$(paid)+" coins. It is in your SoleSmith inventory.");
+ toast("Bought "+q+" x "+cur.n+" (size "+SIZES[curSz]+") for "+$$(paid)+" coins total. It is in your SoleSmith inventory.");
 }
+function upd(){const q=Math.max(1,Math.min(10,Math.floor(+$("#qty").value)||1));
+ $("#bp").textContent=$$((curSz===null?Math.min(...cur.asks):cur.asks[curSz])*q)}
+$("#modal").oninput=e=>{if(e.target.id==="qty")upd()};
 let DROP=null;
 async function refresh(){
  await SB.rpc("tick_prices");
