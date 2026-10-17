@@ -6,8 +6,10 @@
 <title>SoleX - Buy and Sell Designer Sneakers</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>try{document.documentElement.dataset.theme=localStorage.getItem('theme')||'light'}catch(e){}</script>
 <style>
-:root{--g:#00a85a;--r:#e5383b;--bg:#f4f4f2;--ink:#111;--mut:#6b6b6b;--line:#e2e2de}
+:root{--g:#00a85a;--r:#e5383b;--bg:#f4f4f2;--ink:#111;--mut:#6b6b6b;--line:#e2e2de;--card:#fff}
+:root[data-theme="dark"]{--bg:#121212;--ink:#f2f2f2;--mut:#9a9a9a;--line:#2e2e2e;--card:#1e1e1e}
 *{box-sizing:border-box;margin:0}
 body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink)}
 nav{background:#111;color:#fff;display:flex;align-items:center;gap:18px;padding:12px 28px;position:sticky;top:0;z-index:5;flex-wrap:wrap}
@@ -17,7 +19,7 @@ nav{background:#111;color:#fff;display:flex;align-items:center;gap:18px;padding:
 nav button{background:none;border:0;color:#fff;font:700 14px inherit;cursor:pointer;padding:8px 10px;border-radius:8px}
 .lnk{color:#fff;font-weight:700;font-size:14px;text-decoration:none;padding:8px 10px}
 nav .cta{background:var(--g)}
-.tick{background:#fff;border-bottom:1px solid var(--line);overflow:hidden;white-space:nowrap;font-size:13px;padding:9px 0}
+.tick{background:var(--card);border-bottom:1px solid var(--line);overflow:hidden;white-space:nowrap;font-size:13px;padding:9px 0}
 .tick div{display:inline-block;animation:mv 40s linear infinite;padding-left:100%}
 .tick span{margin-right:36px}.tick b{color:var(--g)}
 @keyframes mv{to{transform:translateX(-100%)}}
@@ -25,11 +27,11 @@ nav .cta{background:var(--g)}
 .hero h1{font-size:clamp(34px,5.5vw,64px);font-weight:800;letter-spacing:-2px;line-height:1}
 .hero p{color:var(--mut);margin-top:12px;font-size:17px;max-width:560px}
 .bar{max-width:1280px;margin:auto;padding:14px 28px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.f{background:#fff;border:1px solid var(--line);padding:9px 18px;border-radius:99px;font:700 14px inherit;cursor:pointer}
-.f.on{background:#111;color:#fff;border-color:#111}
-select{margin-left:auto;padding:9px 14px;border-radius:99px;border:1px solid var(--line);background:#fff;font:700 14px inherit}
+.f{background:var(--card);color:var(--ink);border:1px solid var(--line);padding:9px 18px;border-radius:99px;font:700 14px inherit;cursor:pointer}
+.f.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+select{margin-left:auto;padding:9px 14px;border-radius:99px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:700 14px inherit}
 .grid{max-width:1280px;margin:auto;padding:6px 28px 60px;display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
-.card{background:#fff;border-radius:16px;overflow:hidden;cursor:pointer;border:1px solid var(--line);transition:transform .15s,box-shadow .15s}
+.card{background:var(--card);border-radius:16px;overflow:hidden;cursor:pointer;border:1px solid var(--line);transition:transform .15s,box-shadow .15s}
 .card:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(0,0,0,.08)}
 .pic{background:#f1f1ee;padding:26px 14px 14px;position:relative}
 .tag{position:absolute;left:12px;top:12px;font-size:12px;font-weight:700;color:#fff;padding:4px 10px;border-radius:99px}
@@ -40,29 +42,29 @@ select{margin-left:auto;padding:9px 14px;border-radius:99px;border:1px solid var
 .up{color:var(--g);font-weight:700;font-size:13px}.dn{color:var(--r);font-weight:700;font-size:13px}
 .ov{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:flex-start;justify-content:center;overflow:auto;padding:30px 14px;z-index:10}
 .ov.on{display:flex}
-.modal{background:#fff;border-radius:22px;max-width:1000px;width:100%;display:grid;grid-template-columns:1fr 1fr;position:relative;animation:pop .22s}
+.modal{background:var(--card);border-radius:22px;max-width:1000px;width:100%;display:grid;grid-template-columns:1fr 1fr;position:relative;animation:pop .22s}
 @keyframes pop{from{transform:scale(.96);opacity:0}}
 .modal .l{background:#f1f1ee;border-radius:22px 0 0 22px;padding:30px 18px;display:flex;flex-direction:column;justify-content:center;gap:20px}
 .modal .rt{padding:30px}
 .rt h2{font-size:28px;letter-spacing:-.5px}
 .sizes{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0 16px}
-.sz{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 4px;cursor:pointer;font:700 14px inherit}
+.sz{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:9px 4px;cursor:pointer;font:700 14px inherit}
 .sz small{display:block;color:var(--g);font-size:12px;margin-top:2px}
-.sz.on{border:2px solid #111}
+.sz.on{border:2px solid var(--ink)}
 .btns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.b{padding:15px;border-radius:12px;border:2px solid #111;background:#fff;font:800 15px inherit;cursor:pointer}
+.b{padding:15px;border-radius:12px;border:2px solid var(--ink);background:var(--card);color:var(--ink);font:800 15px inherit;cursor:pointer}
 .b.g{background:var(--g);border-color:var(--g);color:#fff}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}
 .stats div{background:var(--bg);border-radius:12px;padding:10px 12px;font-size:13px;color:var(--mut)}
 .stats b{display:block;color:var(--ink);font-size:17px}
-.x{position:absolute;right:14px;top:14px;border:0;background:#fff;width:34px;height:34px;border-radius:50%;font-size:18px;cursor:pointer;z-index:2}
-.imp{background:#fff;border-radius:20px;padding:28px;max-width:520px;width:100%;position:relative;margin:auto}
-.imp input{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;margin:6px 0;font:inherit}
+.x{position:absolute;right:14px;top:14px;border:0;background:var(--card);color:var(--ink);width:34px;height:34px;border-radius:50%;font-size:18px;cursor:pointer;z-index:2}
+.imp{background:var(--card);border-radius:20px;padding:28px;max-width:520px;width:100%;position:relative;margin:auto}
+.imp input{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;margin:6px 0;font:inherit;background:var(--bg);color:var(--ink)}
 .imp textarea{width:100%;height:110px;border:1px solid var(--line);border-radius:12px;padding:12px;font:13px monospace;margin:12px 0}
 #toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,90px);background:#111;color:#fff;padding:13px 22px;border-radius:12px;font-weight:700;transition:transform .3s;z-index:20}
 #toast.show{transform:translate(-50%,0)}
 :focus-visible{outline:3px solid #2be08a;outline-offset:2px}
-.qty{display:flex;align-items:center;gap:10px;margin:0 0 14px;font-weight:700}.qty input{width:80px;padding:10px;border:1px solid var(--line);border-radius:10px;font:700 15px inherit}
+.qty{display:flex;align-items:center;gap:10px;margin:0 0 14px;font-weight:700}.qty input{background:var(--card);color:var(--ink);width:80px;padding:10px;border:1px solid var(--line);border-radius:10px;font:700 15px inherit}
 .dropc{max-width:1224px;margin:6px 28px 16px;background:#111;color:#fff;border-radius:20px;display:grid;grid-template-columns:320px 1fr;gap:18px;align-items:center;padding:20px}
 @media(min-width:1280px){.dropc{margin:6px auto 16px}}
 .dropc .dl{background:#f1f1ee;border-radius:14px;padding:14px}
@@ -79,6 +81,7 @@ select{margin-left:auto;padding:9px 14px;border-radius:99px;border:1px solid var
 <nav>
   <div class="logo">Sole<b>X</b></div>
   <input class="search" id="q" type="search" name="shoe-search" autocomplete="off" placeholder="Search sneakers" aria-label="Search sneakers">
+  <button id="th">Dark mode</button>
   <span id="coins" style="font-weight:700"></span>
   <a class="lnk" id="how" href="#">How to play</a>
   <a class="lnk" id="inv" href="#">My inventory</a>
@@ -240,7 +243,7 @@ function chart(h){
  const w=420,ht=130,mn=Math.min(...h)*.95,mx=Math.max(...h)*1.05;
  const pts=h.map((v,i)=>[i*(w/11),ht-(v-mn)/(mx-mn)*ht]);
  const line=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
- return `<svg viewBox="0 0 ${w} ${ht+4}" style="width:100%;background:#fff;border-radius:12px"><path d="${line} L${w} ${ht} L0 ${ht} Z" fill="rgba(0,168,90,.12)"/><path d="${line}" fill="none" stroke="#00a85a" stroke-width="3" stroke-linejoin="round"/></svg>`;
+ return `<svg viewBox="0 0 ${w} ${ht+4}" style="width:100%;background:var(--card);border-radius:12px"><path d="${line} L${w} ${ht} L0 ${ht} Z" fill="rgba(0,168,90,.12)"/><path d="${line}" fill="none" stroke="#00a85a" stroke-width="3" stroke-linejoin="round"/></svg>`;
 }
 function open(id){
  cur=ITEMS.find(i=>i.id==id);curSz=null;
@@ -334,6 +337,9 @@ setInterval(()=>{const el=$("#dcd");if(!el||!DROP)return;const ms=new Date(DROP.
  const t=Math.ceil(ms/1000);el.textContent="Next drop in "+Math.floor(t/60)+":"+String(t%60).padStart(2,"0")},1000);
 setInterval(()=>{refresh();load()},15000);
 refresh();
+function setTheme(t){document.documentElement.dataset.theme=t;try{localStorage.setItem('theme',t)}catch(e){}$("#th").textContent=t==="dark"?"Light mode":"Dark mode"}
+$("#th").onclick=()=>setTheme(document.documentElement.dataset.theme==="dark"?"light":"dark");
+setTheme(document.documentElement.dataset.theme||"light");
 </script>
 </body>
 </html>
