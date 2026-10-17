@@ -81,6 +81,7 @@ select{margin-left:auto;padding:9px 14px;border-radius:99px;border:1px solid var
 <nav>
   <div class="logo">Sole<b>X</b></div>
   <input class="search" id="q" type="search" name="shoe-search" autocomplete="off" placeholder="Search sneakers" aria-label="Search sneakers">
+  <button id="da">Drop alert: on</button>
   <button id="th">Dark mode</button>
   <span id="coins" style="font-weight:700"></span>
   <a class="lnk" id="how" href="#">How to play</a>
@@ -102,7 +103,9 @@ select{margin-left:auto;padding:9px 14px;border-radius:99px;border:1px solid var
   <input id="em" name="email" type="email" placeholder="Email" autocomplete="email">
   <input id="pw" type="password" placeholder="Password (6+ characters)" autocomplete="current-password">
   <div class="btns" style="margin-top:10px"><button class="b" id="si">Sign in</button><button class="b g" id="su">Create account</button></div>
+  <p style="margin-top:12px"><a href="#" id="fp" style="color:var(--g);font-weight:700">Forgot password?</a></p>
 </div></div>
+<div class="ov" id="pwm"><div class="imp"><h2>New password</h2><input id="np" type="password" placeholder="New password (6+ characters)" autocomplete="new-password"><div class="btns" style="margin-top:10px"><button class="b" id="npc">Cancel</button><button class="b g" id="nps">Save password</button></div></div></div>
 <div id="toast"></div>
 <script>
 const $=s=>document.querySelector(s);
@@ -179,12 +182,30 @@ const SETD=[
 ];
 SETD.forEach(s=>PRE.push({n:s[0]+' '+s[1]+' (Set '+s[0]+')',c:s[2],f:s[3],price:s[4],h:s[5],set:s[0]}));
 const SETN=[...new Set(SETD.map(s=>s[0]))];
+const PREM=[
+['Low Aurora Borealis',['#0b0b0f','#2ecc71','#6c3cff','#00c2a8','#ffffff','#0b0b0f','#2ecc71'],'glitter',5000],
+['Low Solar Flare',['#ff7a1a','#ffd23f','#e63946','#ffd23f','#ffffff','#ffd23f','#7a2e00'],'glossy',6500],
+['Low Black Diamond',['#0b0b0f','#1c1c26','#b5b5c3','#ffffff','#ffffff','#b5b5c3','#0b0b0f'],'glossy',8000],
+['Low Rose Gold Royale',['#f2c6c0','#d4a017','#d4a017','#ffffff','#d4a017','#ffffff','#d4a017'],'glitter',9500],
+['Low Midnight Emperor',['#12305a','#d4a017','#d4a017','#ffd23f','#ffd23f','#12305a','#0b0b0f'],'glossy',11000],
+['Low Platinum Pulse',['#e5e4e2','#b5b5c3','#b5b5c3','#2e86ff','#2e86ff','#ffffff','#b5b5c3'],'glossy',13000],
+['Low Crimson Dynasty',['#a4161a','#ffd23f','#0b0b0f','#ffd23f','#0b0b0f','#ffffff','#a4161a'],'glitter',15500],
+['Low Obsidian Crown',['#0b0b0f','#d4a017','#0b0b0f','#d4a017','#d4a017','#d4a017','#0b0b0f'],'glitter',18000],
+['High Phoenix Rising',['#e63946','#ff7a1a','#ffd23f','#ffd23f','#ffffff','#ffffff','#7a0c14'],'glossy',5500],
+['High Stormbringer',['#14307a','#2e86ff','#cfe6ff','#ffd23f','#ffffff','#ffffff','#061b4a'],'glossy',7500],
+['High Velvet Thunder',['#6c3cff','#0b0b0f','#0b0b0f','#ff4fa3','#ffffff','#ffffff','#6c3cff'],'matte',9000],
+['High Golden Pharaoh',['#d4a017','#0b0b0f','#0b0b0f','#00c2a8','#ffffff','#ffffff','#d4a017'],'glitter',12000],
+['High Galaxy Mirage',['#1c0b3a','#ff4fa3','#2e86ff','#ffffff','#ffffff','#1c0b3a','#6c3cff'],'glitter',14500],
+['High Titanium Ghost',['#b5b5c3','#ffffff','#ffffff','#0b0b0f','#0b0b0f','#ffffff','#b5b5c3'],'glossy',17000],
+['High Emerald Monarch',['#0b6e3a','#d4a017','#d4a017','#2ecc71','#ffffff','#d4a017','#0b0b0f'],'glitter',20000]
+];
+PREM.forEach(p=>PRE.push({n:p[0],c:p[1],f:p[2],price:p[3],prem:true}));
 function shoeSVG(c,f,n,h){
  n=n||'';const hi=!!h||n.startsWith('High '),bolt=/Lightning/.test(n);
  const UP=hi?'M40 148 L36 38 Q38 12 66 12 L116 14 Q136 22 146 54 L162 16 L204 12 L222 94 Q330 100 372 132 Q390 146 388 150 Z':'M40 148 L38 66 Q40 50 62 50 L100 52 Q118 92 150 96 L165 60 L200 58 L215 92 Q330 98 372 132 Q390 146 388 150 Z';
  const HEEL=hi?'M38 148 L36 38 Q38 12 66 12 L88 13 Q100 90 88 148 Z':'M38 148 L38 66 Q40 50 62 50 L82 51 Q96 100 86 148 Z';
  const TONG=hi?'M146 54 L162 16 L204 12 L222 94 Q184 104 150 96 Z':'M150 96 L165 60 L200 58 L215 92 Q182 102 150 96 Z';
- const STR=bolt?'M172 92 L132 124 L152 124 L138 146 L188 112 L166 112 L182 92 Z':'M96 138 C150 152 245 134 305 104 C252 124 200 118 150 108 C124 103 104 114 96 138 Z';
+ const STR=bolt?'M172 92 L132 124 L152 124 L138 146 L188 112 L166 112 L182 92 Z':/Diamond|Platinum|Titanium/.test(n)?'M160 92 L198 122 L160 152 L122 122 Z':/Crown|Emperor|Monarch|Royale|Pharaoh/.test(n)?'M118 146 L124 98 L146 122 L160 94 L174 122 L196 98 L202 146 Z':/Flare|Phoenix|Dynasty/.test(n)?'M160 152 C130 148 122 126 140 108 C142 118 148 122 154 118 C148 106 156 94 170 86 C168 102 186 110 190 128 C192 142 180 152 160 152 Z':'M96 138 C150 152 245 134 305 104 C252 124 200 118 150 108 C124 103 104 114 96 138 Z';
  const L=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c[4]}" stroke-width="4" stroke-linecap="round"/>`;
  let laces='';
  if(hi){for(let y=30;y<=90;y+=12){const xl=y<54?146+(54-y)/38*16:146+(y-54)/42*4,xr=204+(y-12)/82*18;laces+=L(xl+4,y+4,xr-4,y-4)}}
@@ -228,14 +249,14 @@ let ITEMS=PRE.map(d=>build(d)),filt='All',bag=[],cur=null,curSz=null;
 function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2400)}
 function draw(){
  const q=$('#q').value.toLowerCase(),s=$('#sort')?$('#sort').value:'trend';
- let L=ITEMS.filter(i=>(filt==='All'||i.rar===filt||i.n.startsWith(filt+' '))&&i.n.toLowerCase().includes(q));
+ let L=ITEMS.filter(i=>(filt==='All'||i.rar===filt||i.n.startsWith(filt+' ')||(filt==='Premium'&&i.prem))&&i.n.toLowerCase().includes(q));
  L.sort((a,b)=>s==='lo'?a.price-b.price:s==='hi'?b.price-a.price:s==='sold'?b.sold-a.sold:b.chg-a.chg);
  $('#grid').innerHTML=L.length?L.map(i=>`<div class="card" tabindex="0" data-id="${i.id}"><div class="pic"><span class="tag" style="background:${RC[i.rar]}">${i.tag||i.rar}</span>${shoeSVG(i.c,i.f,i.n,i.h)}</div>
  <div class="info"><h4>${i.n.replace(/</g,'&lt;')}</h4><small>Retail ${$$(i.retail)}</small><div class="price">${$$(Math.min(...i.asks))}</div><small>Lowest ask</small>
  <div class="${i.chg>=0?'up':'dn'}" style="margin-top:6px">${i.chg>=0?'+':''}${i.chg}% &middot; ${i.sold.toLocaleString()} sold</div></div></div>`).join(''):'<p style="padding:30px">No sneakers match. Try another search or filter.</p>';
 }
 function bars(){
- $('#filters').innerHTML=['All','Low','High',...SETN,'Legendary','Epic','Rare','Common'].map(f=>`<button class="f ${f===filt?'on':''}" data-f="${f}">${f}</button>`).join('')+
+ $('#filters').innerHTML=['All','Low','High','Premium',...SETN,'Legendary','Epic','Rare','Common'].map(f=>`<button class="f ${f===filt?'on':''}" data-f="${f}">${f}</button>`).join('')+
  `<select id="sort" aria-label="Sort"><option value="trend">Trending</option><option value="sold">Most sold</option><option value="lo">Price: low to high</option><option value="hi">Price: high to low</option></select>`;
  $('#sort').onchange=draw;
 }
@@ -293,7 +314,7 @@ async function login(up){
 $("#si").onclick=()=>login(false);$("#su").onclick=()=>login(true);
 $("#am").onclick=e=>{if(e.target.id==="am")$("#am").classList.remove("on")};
 $("#auth").onclick=()=>me?SB.auth.signOut():$("#am").classList.add("on");
-SB.auth.onAuthStateChange((_e,sess)=>{me=sess?sess.user:null;load()});
+SB.auth.onAuthStateChange((ev,sess)=>{me=sess?sess.user:null;if(ev==="PASSWORD_RECOVERY")$("#pwm").classList.add("on");load()});
 async function purchase(){
  if(!me)return $("#am").classList.add("on");
  if(curSz===null)return toast("Pick a size first");
@@ -340,6 +361,24 @@ refresh();
 function setTheme(t){document.documentElement.dataset.theme=t;try{localStorage.setItem('theme',t)}catch(e){}$("#th").textContent=t==="dark"?"Light mode":"Dark mode"}
 $("#th").onclick=()=>setTheme(document.documentElement.dataset.theme==="dark"?"light":"dark");
 setTheme(document.documentElement.dataset.theme||"light");
+$("#npc").onclick=()=>$("#pwm").classList.remove("on");
+$("#nps").onclick=async()=>{const p=$("#np").value;if(p.length<6)return toast("Use 6 or more characters");
+ const {error}=await SB.auth.updateUser({password:p});if(error)return toast(error.message);
+ $("#np").value="";$("#pwm").classList.remove("on");toast("Password changed")};
+$("#fp").onclick=async e=>{e.preventDefault();const email=$("#em").value.trim();
+ if(!email)return toast("Type your email first, then press Forgot password");
+ const {error}=await SB.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});
+ toast(error?error.message:"Check your email for the reset link")};
+let ALERT=true;try{ALERT=localStorage.getItem("dropalert")!=="off"}catch(e){}
+let AC;function beep(){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.connect(g);g.connect(AC.destination);o.frequency.value=880;g.gain.setValueAtTime(.18,AC.currentTime);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+.7);o.start();o.stop(AC.currentTime+.7)}catch(e){}}
+function paintDa(){$("#da").textContent="Drop alert: "+(ALERT?"on":"off")}
+$("#da").onclick=()=>{ALERT=!ALERT;try{localStorage.setItem("dropalert",ALERT?"on":"off")}catch(e){}paintDa();if(ALERT){beep();toast("You will get an alert 1 minute before each drop")}};
+paintDa();
+let lastWarn=0,lastLive=0;
+setInterval(()=>{if(!ALERT)return;const now=Date.now(),slot=Math.floor(now/600000),next=(slot+1)*600000;
+ if(next-now<=60000&&lastWarn!==next){lastWarn=next;beep();toast("New drop in 1 minute! Get ready.")}
+ if(now-slot*600000<4000&&lastLive!==slot){lastLive=slot;beep();toast("A new drop is live now!")}},1000);
+
 </script>
 </body>
 </html>
